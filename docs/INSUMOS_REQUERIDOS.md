@@ -1,4 +1,4 @@
-# Formatos e insumos que se requieren para seguir actualizando EVAU (v1.3.0)
+# Formatos e insumos que se requieren para seguir actualizando EVAU (v1.3.1)
 
 ## Ya recibidos
 - Formato «Plan de Intervención Educativa» de la USAER (estructura incorporada a la app).

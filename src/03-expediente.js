@@ -11,7 +11,7 @@ function cajaDocumentos(a) {
   const it = (ok, txt, ir) => `<a href="#alumno/${a.id}/${ir}" class="doc-item ${ok ? 'ok' : 'falta'}"><span aria-hidden="true">${ok ? '✅' : '⬜'}</span> ${txt}${ok ? '' : ' <span class="etq r">Falta</span>'}</a>`;
   if (!determinado(a)) {
     const finalCiclo = doc('Informe final', c) || DB.informes.some(i => i.alumnoId === a.id && i.tipo === 'Final del ciclo');
-    return `<div class="docs"><strong>Documentos · sin diagnóstico</strong>${it(cons, 'Consentimiento informado', 'datos')}${it(finalCiclo, 'Informe final ' + esc(c), 'informes')}<span class="nota">No lleva plan de intervención ni evaluación psicopedagógica.</span></div>`;
+    return `<div class="docs"><strong>Documentos · sin diagnóstico</strong>${it(cons, 'Consentimiento informado', 'datos')}${it(finalCiclo, 'Informe final ' + esc(c), 'informes')}<span class="nota">Solo lleva el informe final del ciclo: sin plan de intervención, propuesta ni evaluación psicopedagógica.</span></div>`;
   }
   return `<div class="docs"><strong>Documentos</strong>${it(cons, 'Consentimiento informado', 'datos')}${it(plan, 'Plan de intervención ' + esc(c), 'plan')}${it(doc('Informe de evaluación psicopedagógica'), 'Informe psicopedagógico', 'datos')}${it(doc('Informe psicológico', c), 'Informe psicológico ' + esc(c), 'datos')}${it(doc('Informe de comunicación', c), 'Informe de comunicación ' + esc(c), 'datos')}${it(finalAnt, 'Informe final ' + esc(prev), 'datos')}</div>`;
 }
@@ -22,7 +22,8 @@ function vAlumno(v, id, tab) {
   v.innerHTML = `<p><a href="#inicio">← Alumnos</a></p><h1>📂 ${esc(a.nombre)}</h1>
   <p><strong>${esc(condicionVisible(a))}</strong> · Grupo ${esc(nomGrupo(g))} · ${esc(e.nombre || '')} ${a.estatus !== 'Activo' ? `<span class="etq g">${esc(a.estatus)}</span>` : ''}</p>
   ${cajaDocumentos(a)}
-  <div class="pestanas">${TABS.map(t => `<a href="#alumno/${id}/${t[0]}" class="${t[0] === tab ? 'activo' : ''}">${t[1]}</a>`).join('')}</div><div id="tab"></div>`;
+  <div class="pestanas">${TABS.filter(t => determinado(a) || t[0] !== 'valoracion').map(t => `<a href="#alumno/${id}/${t[0]}" class="${t[0] === tab ? 'activo' : ''}">${t[1]}</a>`).join('')}</div><div id="tab"></div>`;
+  if (tab === 'valoracion' && !determinado(a)) tab = 'historial';   // sin diagnóstico no lleva valoración
   ({ datos: tDatos, historial: tHistorial, evidencias: tEvidencias, valoracion: tValoracion, plan: tPlan, informes: tInformes }[tab] || tHistorial)($('#tab'), a);
 }
 

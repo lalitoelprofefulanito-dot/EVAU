@@ -1,6 +1,6 @@
 'use strict';
 /* EVAU · Expediente Vivo de Atención USAER/UDEEI · núcleo: utilidades, catálogos, almacenamiento y dictado */
-const VERSION = '1.3.0';
+const VERSION = '1.3.1';
 const CLAVE = '0000';
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -115,7 +115,8 @@ const ed = html => puedeEditar() ? html : '';
 /* Con diagnóstico = lleva plan de intervención e informes por área; sin diagnóstico = solo informe final */
 const determinado = a => !CAT.sinDiagnostico.includes(a.condicion);
 const condicionVisible = a => a.condicion.startsWith('Problemas severos') ? 'Sin diagnóstico' : a.condicion;
-const tiposInformeDe = a => determinado(a) ? CAT.tiposInforme : CAT.tiposInforme.filter(t => !t.startsWith('Seguimiento'));
+/* Sin diagnóstico: solo el informe final del ciclo (confirmado por la maestra de apoyo, 23/11/2026) */
+const tiposInformeDe = a => determinado(a) ? CAT.tiposInforme : ['Final del ciclo'];
 const porId = (lista, id) => DB[lista].find(x => x.id === id);
 const nomUsuario = id => (porId('usuarios', id) || {}).nombre || 'Sin nombre';
 const rolUsuario = id => CAT.roles[(porId('usuarios', id) || {}).rol] || '';
