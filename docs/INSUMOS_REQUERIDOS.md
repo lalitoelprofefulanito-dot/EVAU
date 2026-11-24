@@ -16,7 +16,7 @@
 3. **Encabezado del plan:** ¿la dirección de la USAER acepta «CONDICIÓN DEL ALUMNO:» o debe quedar el texto original?
 4. **Formato en blanco del informe final** de los alumnos sin diagnóstico y del informe de seguimiento (si es distinto del plan).
 5. **Formatos que faltan:** informe psicológico, informe psicopedagógico e informe final del maestro de apoyo. Los de psicología (plan) y comunicación (informe final) ya llegaron.
-6. **Reparto real del equipo (con nombres ficticios para probar):** cuántos maestros de apoyo y psicólogos hay, y qué escuelas atiende cada uno, para confirmar que «Participantes» sale bien en el plan. ¿Algún maestro de apoyo atiende más de dos escuelas?
+6. **Lo que falta del reparto del equipo (lo demás ya se recibió):** ya se sabe que son 6 o 7 escuelas, 4 maestros de apoyo (la maestra, dos compañeros y la directora), 2 psicólogos asignados por escuela y 1 maestra de comunicación; la maestra atiende «Guerrero es primero» (miércoles y jueves, con una psicóloga) y «Narciso Mendoza» (lunes, miércoles y viernes, con el psicólogo Érico o Érick, nombre por confirmar). Falta: nombre de la psicóloga, nombre correcto del psicólogo y qué escuelas atienden los otros dos maestros de apoyo y la directora. Están en los documentos «Ámbito» y «Plantilla interna» del proyecto. Los nombres reales se capturan en Ajustes del dispositivo de la maestra, nunca en el repositorio público.
 7. **Cuándo se entrega cada informe** (psicopedagógico, psicológico, de comunicación): hoy la app pide el psicológico y el de comunicación del ciclo actual, y el psicopedagógico de cualquier ciclo.
 
 ## Prioridad 2 · Formatos de la autoridad
