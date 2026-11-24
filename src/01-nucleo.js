@@ -1,6 +1,6 @@
 'use strict';
 /* EVAU · Expediente Vivo de Atención USAER/UDEEI · núcleo: utilidades, catálogos, almacenamiento y dictado */
-const VERSION = '1.4.0';
+const VERSION = '1.4.1';
 const CLAVE = '0000';
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -24,16 +24,17 @@ function edad(fn) {
 
 /* ---------- Catálogos ----------
    Plan de intervención: estructura del formato «Plan de Intervención Educativa» que usa la USAER (apartados, áreas y tipos).
-   Estadística: estructura del cuestionario 911 USAER-1 más las tres categorías «Problemas severos…» que la USAER usa en su estadística
+   Estadística: estructura del cuestionario 911 USAER-1 con el catálogo de condiciones de la Plantilla interna de la USAER (incluye «Otras condiciones: Dificultad severa…»)
    para alumnos sin diagnóstico. Lo demás son modelos de uso común, no oficiales. */
 const CAT = {
   roles: { apoyo: 'Maestra/o de apoyo', psicologia: 'Psicología', comunicacion: 'Comunicación', direccion: 'Dirección (consulta y carpeta general)' },
   turnos: ['Matutino', 'Vespertino', 'Jornada ampliada', 'Tiempo completo'],
   grados: ['1°', '2°', '3°', '4°', '5°', '6°'],
   tiposRegistro: ['Apoyo individual', 'Acompañamiento en aula', 'Asesoría a docente', 'Orientación a familia', 'Entrevista', 'Seguimiento', 'Observación', 'Incidencia', 'Canalización'],
-  condiciones: ['En detección (sin condición identificada)', 'Ceguera', 'Baja visión', 'Sordera', 'Hipoacusia', 'Discapacidad motriz', 'Discapacidad intelectual', 'Aptitudes sobresalientes', 'Discapacidad psicosocial', 'Sordoceguera', 'Trastorno del espectro autista', 'Discapacidad múltiple', 'TDAH', 'Otras condiciones', 'Problemas severos de comunicación', 'Problemas severos de conducta', 'Problemas severos de aprendizaje'],
+  /* Catálogo de la Plantilla interna de inicio de la USAER (estructura del 911 USAER-1), recibida el 23/11/2026 */
+  condiciones: ['En detección (sin condición identificada)', 'Ceguera', 'Baja visión', 'Sordera', 'Hipoacusia', 'Sordoceguera', 'Discapacidad motriz', 'Discapacidad intelectual', 'Discapacidad psicosocial', 'Discapacidad múltiple', 'Trastorno del espectro autista', 'TDAH', 'Aptitudes sobresalientes intelectuales', 'Aptitudes sobresalientes creativas', 'Aptitudes sobresalientes socioafectivas', 'Aptitudes sobresalientes artísticas', 'Aptitudes sobresalientes psicomotrices', 'Aptitudes sobresalientes (tipo por especificar)', 'Dificultad severa de conducta', 'Dificultad severa de comunicación', 'Dificultad severa de aprendizaje', 'Otras condiciones'],
   /* Alumnos sin diagnóstico: no llevan plan de intervención ni evaluación psicopedagógica, solo informe final del ciclo */
-  sinDiagnostico: ['En detección (sin condición identificada)', 'Problemas severos de comunicación', 'Problemas severos de conducta', 'Problemas severos de aprendizaje'],
+  sinDiagnostico: ['En detección (sin condición identificada)', 'Dificultad severa de conducta', 'Dificultad severa de comunicación', 'Dificultad severa de aprendizaje'],
   /* Formato del plan de intervención */
   areas: ['Cognoscitiva', 'Motrices', 'Sociales', 'Afectivas', 'Académicas', 'Comunicativo-lingüística', 'Independencia y autocuidado'],
   bapCats: ['Del contexto físico y sensorial', 'Metodológicas o didácticas', 'Organizativas', 'Actitudinales', 'Sociofamiliares'],
@@ -96,6 +97,9 @@ function migrar(d) {
   d = Object.assign(base, d);
   d.usaer = Object.assign(estadoVacio().usaer, d.usaer || {});
   (d.documentos || []).forEach(x => { if (x.tipo === 'Evaluación psicopedagógica') x.tipo = 'Informe de evaluación psicopedagógica'; });
+  /* 1.4.1: nombres de la Plantilla interna de la USAER */
+  const renCond = { 'Problemas severos de comunicación': 'Dificultad severa de comunicación', 'Problemas severos de conducta': 'Dificultad severa de conducta', 'Problemas severos de aprendizaje': 'Dificultad severa de aprendizaje', 'Aptitudes sobresalientes': 'Aptitudes sobresalientes (tipo por especificar)' };
+  (d.alumnos || []).forEach(a => { if (renCond[a.condicion]) a.condicion = renCond[a.condicion]; });
   if ((d.version || 1) >= 2 && !Array.isArray(d.planes)) return d;
   const planes = {}, p = id => (planes[id] = planes[id] || planVacio());
   const mapBap = { 'Actitudinal': 'Actitudinales', 'Pedagógica / didáctica': 'Metodológicas o didácticas', 'De organización': 'Organizativas', 'De comunicación': 'Metodológicas o didácticas', 'Física / de accesibilidad': 'Del contexto físico y sensorial', 'Normativa': 'Organizativas', 'Socioeconómica': 'Sociofamiliares' };
@@ -114,7 +118,7 @@ const puedeEditar = () => USUARIO && USUARIO.rol !== 'direccion';
 const ed = html => puedeEditar() ? html : '';
 /* Con diagnóstico = lleva plan de intervención e informes por área; sin diagnóstico = solo informe final */
 const determinado = a => !CAT.sinDiagnostico.includes(a.condicion);
-const condicionVisible = a => a.condicion.startsWith('Problemas severos') ? 'Sin diagnóstico' : a.condicion;
+const condicionVisible = a => a.condicion.startsWith('Dificultad severa') ? 'Sin diagnóstico' : a.condicion;
 /* Sin diagnóstico: solo el informe final del ciclo (confirmado por la maestra de apoyo, 23/11/2026) */
 const tiposInformeDe = a => determinado(a) ? CAT.tiposInforme : ['Final del ciclo'];
 const porId = (lista, id) => DB[lista].find(x => x.id === id);

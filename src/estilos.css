@@ -151,3 +151,6 @@ label.boton{display:inline-block}
 .hoja .enc-inst p{margin:0}
 .hoja .enc-inst .leyenda{font-style:italic;margin-top:4pt}
 .hoja table.datos-com td{font-size:11pt}
+.hoja .logos{display:flex;justify-content:space-between;align-items:center;margin-bottom:6pt}
+.hoja .logos img{height:1.4cm;width:auto}
+.boton-archivo{display:inline-block;cursor:pointer;border:2px solid #0f2f5c;border-radius:8px;padding:.3rem .7rem;font-weight:bold}

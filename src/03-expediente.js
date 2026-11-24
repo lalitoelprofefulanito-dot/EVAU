@@ -214,7 +214,7 @@ function htmlPlan(a, p, edit) {
   const enc = `<div class="encab"><strong>NOMBRE DEL ALUMNO:</strong> <u>${esc(a.nombre.toUpperCase())}</u> &nbsp; <strong>GRADO Y GRUPO:</strong> <u>${esc(nomGrupo(g))}</u><br><strong>ESCUELA PRIMARIA:</strong> <u>${esc((e.nombre || '').toUpperCase())}</u> &nbsp; <strong>CICLO ESCOLAR:</strong> <u>${esc(DB.config.ciclo)}</u><br>${esc(u.encabezado)} <strong><u>${esc(a.condicion.toUpperCase())}</u></strong></div>`;
   const cuerpo = SECCIONES.map(([k, tit, fn]) => `<h2>${esc(tit.toUpperCase())}</h2>${fn(p, a, edit)}`).join('')
     .replace(/<table([^>]*)><tr>((?:<th[^>]*>[\s\S]*?<\/th>)+)<\/tr>/g, '<table$1><thead><tr>$2</tr></thead>');
-  return `<div class="portada"><p><strong>${esc(u.unidad)}</strong><br><strong>C.C.T.: ${esc(u.cct)} &nbsp; TURNO: ${esc(u.turno)}</strong><br>${esc(u.domicilio)}</p>
+  return `<div class="portada">${u.logoIzq || u.logoDer ? `<div class="logos">${u.logoIzq ? `<img src="${u.logoIzq}" alt="">` : '<span></span>'}${u.logoDer ? `<img src="${u.logoDer}" alt="">` : '<span></span>'}</div>` : ''}<p><strong>${esc(u.unidad)}</strong><br><strong>C.C.T.: ${esc(u.cct)} &nbsp; TURNO: ${esc(u.turno)}</strong><br>${esc(u.domicilio)}</p>
   <p class="t-plan">PLAN DE INTERVENCIÓN EDUCATIVA</p><p><strong>NIVEL EDUCATIVO:</strong><br>PRIMARIA</p><p><strong>NOMBRE DEL ALUMNO:</strong><br><u>${esc(a.nombre.toUpperCase())}</u></p><p><strong>CICLO ESCOLAR ${esc(DB.config.ciclo)}</strong></p><p><strong>GRADO Y GRUPO:</strong><br>${esc(nomGrupo(g))}</p><p class="nota">Formato de uso en la USAER · datos ficticios de prueba</p></div>
   <div class="salto"></div><table class="marco"><thead><tr><td>${enc}</td></tr></thead><tbody><tr><td>${cuerpo}</td></tr></tbody></table>`;
 }

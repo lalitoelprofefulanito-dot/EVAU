@@ -31,7 +31,8 @@ const maestraCom = a => DB.usuarios.find(u => u.rol === 'comunicacion' && atiend
 const MAYUS = s => esc(String(s || '').toUpperCase());
 function encabezadoInst(fechaRef) {
   const u = DB.usaer;
-  return `<div class="enc-inst">${lineas(u.dependencia).map(l => `<p>${esc(l.toUpperCase())}</p>`).join('')}${u.zona ? `<p><strong>${MAYUS(u.zona)}</strong></p>` : ''}
+  const logos = u.logoIzq || u.logoDer ? `<div class="logos">${u.logoIzq ? `<img src="${u.logoIzq}" alt="">` : '<span></span>'}${u.logoDer ? `<img src="${u.logoDer}" alt="">` : '<span></span>'}</div>` : '';
+  return `${logos}<div class="enc-inst">${lineas(u.dependencia).map(l => `<p>${esc(l.toUpperCase())}</p>`).join('')}${u.zona ? `<p><strong>${MAYUS(u.zona)}</strong></p>` : ''}
   <p><strong>${MAYUS(u.unidad)}</strong></p><p><strong>C.C.T.: ${esc(u.cct)} &nbsp; TURNO: ${MAYUS(u.turno)}</strong></p><p>${MAYUS(u.domicilio)}</p>
   <p><strong>CICLO ESCOLAR ${esc(DB.config.ciclo)}</strong></p>${u.leyenda ? `<p class="leyenda">«${esc(u.leyenda)}»</p>` : ''}</div>`;
 }

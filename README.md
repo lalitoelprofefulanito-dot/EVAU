@@ -1,4 +1,4 @@
-# EVAU · Expediente Vivo de Atención USAER/UDEEI (versión 1.4.0)
+# EVAU · Expediente Vivo de Atención USAER/UDEEI (versión 1.4.1)
 
 Prototipo de aplicación web (PWA) para sustituir la carpeta física de la maestra de apoyo.
 **Usar solo con datos ficticios.** Clave de acceso: **0000**.
@@ -16,7 +16,8 @@ Prototipo de aplicación web (PWA) para sustituir la carpeta física de la maest
 - **Registro de evaluación (noviembre, marzo, junio)** que se llena con el registro cronológico.
 - **Informes de corte** que analizan los registros: fortalezas, dificultades persistentes, apoyos, avance en el nivel de apoyo, comunicación con la familia y recomendaciones.
 - **Bitácora de incidencia** imprimible, carpetas de grupo, estadística 911 USAER-1, respaldo con documentos, bitácora de acciones.
-- **Alumnos con y sin diagnóstico (1.2):** «En detección» y las tres categorías de la estadística de la USAER (problemas severos de comunicación, de conducta y de aprendizaje) no llevan plan de intervención ni evaluación psicopedagógica: su caja de documentos pide solo consentimiento e informe final del ciclo, y solo pueden generar el informe final del ciclo (1.3.1: sin informe para la familia ni pestaña de valoración, confirmado por la maestra el 23/11/2026). En la carpeta se muestran como «Sin diagnóstico». Con diagnóstico, la caja pide además informe psicopedagógico, psicológico y de comunicación.
+- **Alumnos con y sin diagnóstico (1.2):** «En detección» y las tres «Dificultad severa de conducta / comunicación / aprendizaje» no llevan plan de intervención ni evaluación psicopedagógica: su caja de documentos pide solo consentimiento e informe final del ciclo, y solo pueden generar el informe final del ciclo (1.3.1: sin informe para la familia ni pestaña de valoración, confirmado por la maestra el 23/11/2026). En la carpeta se muestran como «Sin diagnóstico». Con diagnóstico, la caja pide además informe psicopedagógico, psicológico y de comunicación.
+- **Catálogo de la Plantilla interna y logotipos (1.4.1):** las condiciones siguen la Plantilla interna de la USAER (estructura del 911 USAER-1): «Dificultad severa de conducta / comunicación / aprendizaje» y las cinco aptitudes sobresalientes. Los datos anteriores se convierten solos. En Ajustes se cargan dos logotipos opcionales para el plan y los formatos de comunicación. `herramientas/insumos_formulario.gs` crea un formulario de Google para reunir los insumos pendientes.
 - **Área de comunicación (1.4.0):** pestaña «Comunicación» en cada alumno con el **Plan de intervención individual** (funciones o capacidades con sus actividades, PDA, campos formativos y contenidos, metodologías y materiales) y el **Informe final de comunicación** (diagnóstico, etapa del lenguaje, descripción por componentes y recomendaciones para padres y docentes), con la estructura de los formatos de la maestra de comunicación de la USAER (24/11/2026). Se imprimen o bajan a Word con el encabezado institucional, edad en años.meses y firmas de la maestra de comunicación y la directora. El informe guardado marca «Informe de comunicación» en la caja de documentos. Ajustes agrega dependencias, zona escolar, lugar y leyenda del año para los encabezados.
 - **Equipo de cada escuela (1.3.2):** en Ajustes → Profesionales se marcan las escuelas que atiende cada persona (la maestra de apoyo suele tener una o dos, y cada escuela puede tener otro psicólogo). El plan de intervención pone en «Participantes» solo al equipo de la escuela del alumno, y la pantalla Escuelas muestra el equipo de cada una. La maestra de comunicación, única en la USAER, se deja sin escuelas marcadas y aparece en todas (explicado por la maestra el 23/11/2026).
 - **Carpeta general de la escuela (1.2):** notas de cada visita, por escuela. Dirección consulta todo y escribe solo aquí.
@@ -33,7 +34,7 @@ manifest.webmanifest    Instalación en celular
 sw.js                   Funcionamiento sin internet (solo archivos de la app)
 icons/                  Iconos
 src/                    Código fuente: base.html, estilos.css, 01-nucleo.js, 02-pantallas.js, 03-expediente.js
-herramientas/           construir.py (une src/ en index.html), prueba.py (75 comprobaciones, simula el micrófono y dos dispositivos), muestras.py, iconos.py
+herramientas/           construir.py (une src/ en index.html), prueba.py (76 comprobaciones, simula el micrófono y dos dispositivos), muestras.py, iconos.py
 docs/                   QUE_HACE_EVAU.pdf, INSUMOS_REQUERIDOS.md, PROMPT_CONTINUIDAD.html, Ejemplo_Plan_de_intervencion.pdf, Ejemplo_Informe_corte_noviembre.pdf
 ```
 Para cambiar algo: editar `src/`, ejecutar `python3 herramientas/construir.py .` y subir la versión en `sw.js` (CACHE) y en `01-nucleo.js` (VERSION).
@@ -41,7 +42,7 @@ Para cambiar algo: editar `src/`, ejecutar `python3 herramientas/construir.py .`
 ## Origen de los catálogos
 - Plan de intervención: apartados, áreas y tipos del formato «Plan de Intervención Educativa» de la USAER (sin datos de ningún alumno real).
 - Bitácora de incidencia: clasificación y antecedentes de una bitácora escolar de uso real.
-- Estadística: estructura oficial del 911 USAER-1, más las tres filas «Problemas severos…» que la USAER usa en su estadística (falta confirmar si el 911 vigente las pide). Lo demás son modelos de uso común, no oficiales.
+- Estadística: catálogo de condiciones de la Plantilla interna de la USAER (estructura del 911 USAER-1).
 - Los documentos «Evaluación psicopedagógica» de versiones anteriores se renombran solos a «Informe de evaluación psicopedagógica».
 - Los datos de respaldos 1.0 se convierten solos al formato nuevo (función `migrar`).
 

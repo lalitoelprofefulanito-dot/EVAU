@@ -1,32 +1,39 @@
-# Formatos e insumos que se requieren para seguir actualizando EVAU (v1.4.0)
+# Formatos e insumos para seguir actualizando EVAU (v1.4.1 · auditoría del 24/11/2026)
 
-## Ya recibidos
-- Formato «Plan de Intervención Educativa» de la USAER (estructura incorporada a la app).
-- Revisión del plan (sus criterios están en la «Revisión rápida»).
-- Bitácora de incidencia (modelo de las incidencias).
-- Audios de la maestra de apoyo (17 y 19/11/2026): estructura del equipo, categorías de alumnos sin diagnóstico, documentos por tipo de alumno y pedido de un solo expediente compartido.
-- Plan de atención de psicología (23/11/2026). Todavía no está en la app: hay que volver a compartirlo en el chat donde se integre.
-- Plan de intervención individual de comunicación e Informe final de comunicación (24/11/2026): ya están en la 1.4.0 (solo su estructura).
-- Plantilla interna y «Ámbito» de inicio de ciclo (23/11/2026): cómo entrega la USAER su estadística.
-- Audios del 23/11/2026 sobre el reparto del personal: el psicólogo cambia según la escuela; la maestra de apoyo atiende una o dos escuelas (con dos escuelas, normalmente dos psicólogos); hay una sola maestra de comunicación para toda la USAER. Ya está en la 1.3.2.
-- Documento «Dictado por voz en aplicaciones web» (23/11/2026): sus bases ya están en la 1.3.
+## A. Ya entregados y ya usados en la app
+| Insumo | Fecha | Qué resolvió en EVAU |
+|---|---|---|
+| Documento «Proyecto de Aplicación Atenas USAER» y formatos modelo F01–F17 | nov. 2026 | Origen de la app y de sus catálogos |
+| Plan de Intervención Educativa de la USAER (dos planes), bitácora y revisiones del plan | 17/11/2026 | Plan con el formato real, «Revisión rápida» y bitácora de incidencia |
+| Audios de la maestra de apoyo | 17, 19 y 23/11/2026 | Registro cronológico, alumnos sin diagnóstico, carpeta general, reparto del personal por escuela |
+| Documento «Dictado por voz en aplicaciones web» | 23/11/2026 | Reglas del dictado |
+| **Plantilla interna de inicio 2026-2027** | 23/11/2026 | Datos de la USAER (zona 004, CCT, turno matutino, domicilio, directora), las 7 personas del equipo con su función y sus escuelas, horario del personal (8:00 a 12:30) y **catálogo oficial de condiciones** (estructura del 911 USAER-1, con «Otras condiciones: Dificultad severa de conducta / comunicación / aprendizaje») |
+| **Ámbito de inicio 2026-2027** | 23/11/2026 | Las 7 escuelas con CCT, zona, domicilio y director(a); 44 grupos con su docente |
+| Plan de intervención individual de comunicación e Informe final de comunicación | 24/11/2026 | Pestaña «Comunicación» (1.4.0), encabezado institucional y logotipos (1.4.1) |
 
-## Prioridad 1 · Para que la maestra la use de verdad
-1. **Prueba del dictado y de «Combinar» en su celular y en el de una compañera:** ¿qué celular usa (Android o iPhone)? ¿El dictado separa bien la actividad de la observación cuando hace una pausa?
-2. **Opinión sobre las marcas** (logro, dificultad, apoyo brindado) y los **niveles de apoyo** (ayuda total, modelado, indicación verbal, recordatorio visual, independiente): ¿son los que usa o cambiaría alguno?
-3. **Encabezado del plan:** ¿la dirección de la USAER acepta «CONDICIÓN DEL ALUMNO:» o debe quedar el texto original?
-4. **Formato en blanco del informe final** de los alumnos sin diagnóstico y del informe de seguimiento (si es distinto del plan).
-5. **Formatos que faltan:** informe psicológico, informe psicopedagógico e informe final del maestro de apoyo. Ya llegaron el plan de psicología y los dos de comunicación (plan e informe final).
-6. **Confirmar con la maestra tres diferencias entre sus audios y la Plantilla interna de inicio 2026-2027** (recibida el 23/11/2026 junto con el Ámbito; con ellas se armó, fuera del repositorio, un respaldo con el equipo real): (a) los audios hablan de dos psicólogos y la plantilla registra una sola psicóloga para las 7 escuelas; (b) el compañero que en los audios aparece como psicólogo figura en la plantilla como maestro de apoyo (con licenciatura en psicología) en otras dos escuelas; (c) los audios dicen que la directora también atiende una escuela como maestra de apoyo y la plantilla la registra como directora sin grupo. Falta además el turno de 5 escuelas.
-7. **Cuándo se entrega cada informe** (psicopedagógico, psicológico, de comunicación): hoy la app pide el psicológico y el de comunicación del ciclo actual (el de comunicación se cumple al guardar el informe final de comunicación), y el psicopedagógico de cualquier ciclo.
+## B. Pendientes que se dieron por resueltos con lo entregado (ya no se piden)
+1. **Reparto del personal y diferencias con los audios.** Se toma la **Plantilla interna** como fuente oficial: una psicóloga para las 7 escuelas, cuatro maestros de apoyo (el compañero con licenciatura en psicología cuenta como maestro de apoyo) y la directora sin grupo. Si en la práctica alguien trabaja distinto, se corrige en Ajustes → Profesionales.
+2. **Turno de las escuelas.** Matutino en las 7: la USAER es de turno matutino y su personal trabaja de 8:00 a 12:30 (Plantilla).
+3. **Domicilio y código postal de la USAER.** Se usa el de la Plantilla (C.P. 39753).
+4. **Categorías del 911.** La Plantilla trae el catálogo oficial: EVAU 1.4.1 ya usa «Dificultad severa de…» y las cinco aptitudes sobresalientes (intelectual, creativa, socioafectiva, artística y psicomotriz). Los datos anteriores se convierten solos.
+5. **Logotipos.** Vienen en los formatos de comunicación; están en el respaldo del equipo y se pueden cambiar en Ajustes.
+6. **Cuándo se entregan los documentos de comunicación.** Según los formatos: plan por periodo (el ejemplo cubre oct.–ene. y se firma a fin de enero) e informe final en julio.
 
-## Prioridad 2 · Formatos de la autoridad
-8. Formato de evaluación psicopedagógica y de detección que usa su USAER.
-9. Cuestionario 911 vigente 2026-2027, para confirmar si incluye las tres categorías «Problemas severos…».
-10. Logotipos, solo si la autoridad autoriza su uso.
+## C. Ya entregado, pero no está en este chat
+7. **Plan de atención de psicología** (23/11/2026, en otro chat). Volver a adjuntarlo en el chat donde se integre.
 
-## Prioridad 3 · Para usar datos reales (hoy NO se debe)
-11. Decisión sobre claves personales (la 0000 solo sirve para pruebas), cifrado y respaldo automático.
-12. Aviso de privacidad de la autoridad responsable y autorización de la dirección para el uso del sistema. Las cartas de consentimiento de las familias son necesarias pero no suficientes.
-13. **Sincronización:** servidor, quién lo paga y lo administra, y cómo entran la maestra de comunicación y la directora a los espacios de los cuatro maestros de apoyo.
-14. Decisión de Eduardo: si EVAU se comparte con toda la USAER y en qué condiciones.
+## D. Pendientes reales (se piden con el formulario de Google `herramientas/insumos_formulario.gs`)
+### Prioridad 1 · Para que la maestra la use de verdad
+8. **Prueba del dictado y de «Combinar»** en su celular y en el de una compañera: tipo de celular y navegador; si el dictado separa bien la actividad de la observación.
+9. **Marcas** (logro, dificultad, apoyo brindado) y **niveles de apoyo** (ayuda total, modelado, indicación verbal, recordatorio visual, independiente): si sirven o qué cambiar.
+10. **Encabezado del plan:** «CONDICIÓN DEL ALUMNO:» o «EL ALUMNO PRESENTA UNA BARRERA… ASOCIADA A:».
+11. **Formatos en blanco:** informe final de alumnos sin diagnóstico, informe de seguimiento (si es distinto del plan), informe psicológico, informe psicopedagógico e informe final del maestro de apoyo.
+12. **Cuándo se entrega** el informe psicológico, el psicopedagógico y el informe del maestro de apoyo.
+### Prioridad 2 · Formatos de la autoridad
+13. Formato de **evaluación psicopedagógica y de detección** que usa la USAER.
+### Prioridad 3 · Para usar datos reales (hoy NO se debe)
+14. Claves personales en lugar de 0000, cifrado y respaldo automático.
+15. Aviso de privacidad de la autoridad responsable y **autorización de la directora** para usar el sistema.
+16. **Sincronización:** quién administra los datos del equipo y con qué cuentas (el equipo no tiene cuentas institucionales de Google Workspace).
+### Decisión de Eduardo (no va en el formulario)
+17. Si EVAU se comparte con toda la USAER y en qué condiciones.

@@ -52,7 +52,7 @@ async def main():
             d1 = await pg.inner_text('.docs'); chk('con diagnóstico: pide informes psicopedagógico, psicológico y de comunicación', all(x in d1 for x in ['Informe psicopedagógico', 'Informe psicológico', 'Informe de comunicación']), d1)
             await pg.goto(URL + '#alumno/a7/plan'); await pg.wait_for_selector('#tab .caja')
             chk('sin diagnóstico: no muestra plan', await pg.locator('.seccion').count() == 0 and 'solo el' in await pg.inner_text('#tab'))
-            chk('categoría «Problemas severos» no aparece en la carpeta', 'Sin diagnóstico' in await pg.inner_text('main h1 + p'))
+            chk('categoría «Dificultad severa» no aparece en la carpeta', 'Sin diagnóstico' in await pg.inner_text('main h1 + p'))
             await pg.goto(URL + '#alumno/a7/informes'); await pg.click('#gi')
             ops = await pg.locator('#f_tipo option').all_inner_texts(); chk('sin diagnóstico: solo informe final', ops == ['Final del ciclo'], str(ops))
             chk('sin diagnóstico: sin pestaña de valoración', await pg.locator('.pestanas a', has_text='Valoración').count() == 0)
@@ -85,7 +85,8 @@ async def main():
             await pg.goto(URL + '#alumno/a1/comunicacion'); await pg.wait_for_selector('#vpc')
             chk('comunicación: ficha vacía no cuenta como dato', await pg.evaluate("(() => { const ks = []; cadaDato(DB, k => ks.push(k)); return !ks.includes('comunicacion:a1') && ks.includes('comunicacion:a5'); })()"))
             await pg.goto(URL + '#estadistica'); await pg.wait_for_selector('#tab table')
-            est = await pg.inner_text('#tab'); chk('estadística con las tres categorías', all(x in est for x in ['Problemas severos de comunicación', 'Problemas severos de conducta', 'Problemas severos de aprendizaje']))
+            est = await pg.inner_text('#tab'); chk('estadística con el catálogo de la plantilla', all(x in est for x in ['Dificultad severa de comunicación', 'Dificultad severa de conducta', 'Dificultad severa de aprendizaje', 'Aptitudes sobresalientes creativas', 'Otras condiciones']))
+            chk('migración: «Problemas severos» pasa a «Dificultad severa»', await pg.evaluate("migrar({ version: 2, alumnos: [{ id: 'x', condicion: 'Problemas severos de conducta' }, { id: 'y', condicion: 'Aptitudes sobresalientes' }], planes: {} }).alumnos.map(a => a.condicion).join('|') === 'Dificultad severa de conducta|Aptitudes sobresalientes (tipo por especificar)'"))
             await pg.goto(URL + '#resumen'); await pg.wait_for_selector('.tarjetas')
             chk('resumen: sin plan solo cuenta alumnos con diagnóstico', 'Con diagnóstico y sin plan' in await pg.inner_text('.tarjetas'))
             # Dictado de un toque: dos frases con pausa
