@@ -1,6 +1,6 @@
 'use strict';
 /* EVAU · Expediente Vivo de Atención USAER/UDEEI · núcleo: utilidades, catálogos, almacenamiento y dictado */
-const VERSION = '1.3.1';
+const VERSION = '1.3.2';
 const CLAVE = '0000';
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -119,6 +119,10 @@ const condicionVisible = a => a.condicion.startsWith('Problemas severos') ? 'Sin
 const tiposInformeDe = a => determinado(a) ? CAT.tiposInforme : ['Final del ciclo'];
 const porId = (lista, id) => DB[lista].find(x => x.id === id);
 const nomUsuario = id => (porId('usuarios', id) || {}).nombre || 'Sin nombre';
+/* Escuelas que atiende cada profesional (1.3.2). Sin escuelas marcadas = atiende todas (p. ej. la maestra de comunicación, única en la USAER). */
+const atiende = (u, escuelaId) => !(u.escuelas || []).length || u.escuelas.includes(escuelaId);
+const equipoDe = escuelaId => DB.usuarios.filter(u => u.rol !== 'direccion' && atiende(u, escuelaId));
+const escuelasDe = u => (u.escuelas || []).length ? u.escuelas.map(id => (porId('escuelas', id) || {}).nombre).filter(Boolean).join(' · ') || 'Todas' : 'Todas';
 const rolUsuario = id => CAT.roles[(porId('usuarios', id) || {}).rol] || '';
 const nomGrupo = g => g ? g.grado + ' ' + g.grupo : '';
 function ciclo() { const [a, b] = DB.config.ciclo.split('-'); return { ini: a + '-08-01', fin: b + '-07-31', a, b }; }
@@ -282,7 +286,7 @@ function formulario(titulo, campos, valores, alGuardar, intro) {
       const ops = c.opciones.map(o => { const [val, txt] = Array.isArray(o) ? o : [o, o]; return `<option value="${esc(val)}" ${String(val) === String(v) ? 'selected' : ''}>${esc(txt)}</option>`; }).join('');
       ctl = `<select id="f_${c.k}">${c.req ? '' : '<option value="">—</option>'}${ops}</select>`;
     } else if (c.tipo === 'textarea' || c.tipo === 'lista') ctl = `<textarea id="f_${c.k}" ${c.alto ? `style="min-height:${c.alto}rem"` : ''}>${esc(Array.isArray(v) ? v.join('\n') : v)}</textarea>`;
-    else if (c.tipo === 'checks') ctl = `<div class="chips chips-col" id="f_${c.k}">${c.opciones.map((o, i) => `<label><input type="checkbox" value="${esc(o)}" ${(v || []).includes(o) ? 'checked' : ''}>${esc(o)}</label>`).join('')}</div>`;
+    else if (c.tipo === 'checks') ctl = `<div class="chips chips-col" id="f_${c.k}">${c.opciones.map(o => { const [val, txt] = Array.isArray(o) ? o : [o, o]; return `<label><input type="checkbox" value="${esc(val)}" ${(v || []).includes(val) ? 'checked' : ''}>${esc(txt)}</label>`; }).join('')}</div>`;
     else ctl = `<input id="f_${c.k}" type="${c.tipo || 'text'}" value="${esc(v)}" ${c.tipo === 'number' ? 'min="0" max="100"' : ''}>`;
     const mic = c.tipo === 'textarea' || c.tipo === 'lista' ? `<button type="button" class="sec chico mic" data-mic="${esc(c.k)}" aria-label="Dictar en ${esc(c.label)}">🎙 Dictar</button>` : '';
     return `<div class="etiqueta-mic"><label for="f_${c.k}">${esc(c.label)}${c.req ? ' *' : ''}</label>${mic}</div>${ctl}${c.ayuda ? `<div class="nota">${esc(c.ayuda)}</div>` : ''}${c.tipo === 'lista' ? '<div class="nota">Escriba una idea por renglón.</div>' : ''}`;

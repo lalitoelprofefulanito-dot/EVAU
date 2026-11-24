@@ -8,6 +8,13 @@ function cargarEjemplo() {
     { id: 'e2', nombre: 'Escuela Primaria «Ejemplo Dos»', cct: '00DPR0001Z', turno: 'Vespertino', zona: '000', director: 'Dir. Segunda Ficticio', telefono: '55 0000 0001', domicilio: 'Calle Ficticia 2, Colonia Ejemplo' }
   ];
   const gs = [['g1', 'e1', '1°', 'A'], ['g2', 'e1', '2°', 'A'], ['g3', 'e1', '4°', 'B'], ['g4', 'e1', '6°', 'A'], ['g5', 'e2', '3°', 'A'], ['g6', 'e2', '5°', 'A']];
+  d.usuarios = [
+    { id: 'u1', nombre: 'Mtra. Apoyo Ficticio', rol: 'apoyo', escuelas: ['e1', 'e2'] },
+    { id: 'u2', nombre: 'Psic. Psicología Ficticio', rol: 'psicologia', escuelas: ['e1'] },
+    { id: 'u5', nombre: 'Psic. Segundo Ficticio', rol: 'psicologia', escuelas: ['e2'] },
+    { id: 'u3', nombre: 'Mtra. Comunicación Ficticio', rol: 'comunicacion', escuelas: [] },
+    { id: 'u4', nombre: 'Dir. Dirección Ficticio', rol: 'direccion', escuelas: [] }
+  ];
   d.grupos = gs.map(g => ({ id: g[0], escuelaId: g[1], grado: g[2], grupo: g[3], docente: 'Docente ' + g[2] + g[3] + ' Ficticio' }));
   const al = [
     ['a1', 'Lucía Ficticio Uno', 'M', '2017-03-14', 'g3', 'Discapacidad intelectual', true],
@@ -189,7 +196,7 @@ function vResumen(v) {
 const CAMPOS_ESCUELA = [{ k: 'nombre', label: 'Nombre de la escuela', req: 1 }, { k: 'cct', label: 'CCT' }, { k: 'turno', label: 'Turno', tipo: 'select', opciones: CAT.turnos }, { k: 'zona', label: 'Zona escolar' }, { k: 'director', label: 'Director(a)' }, { k: 'telefono', label: 'Teléfono' }, { k: 'domicilio', label: 'Domicilio' }];
 function vEscuelas(v) {
   v.innerHTML = `<div class="fila"><h1>Escuelas</h1><span class="sep"></span>${ed('<button id="nueva">＋ Nueva escuela</button>')}</div>` +
-    (DB.escuelas.map(e => `<div class="caja"><h2>${esc(e.nombre)}</h2><p>CCT: <strong>${esc(e.cct)}</strong> · Turno: ${esc(e.turno)} · Zona: ${esc(e.zona)}<br>Director(a): ${esc(e.director)} · Tel.: ${esc(e.telefono)}<br>${esc(e.domicilio)}</p>
+    (DB.escuelas.map(e => `<div class="caja"><h2>${esc(e.nombre)}</h2><p>CCT: <strong>${esc(e.cct)}</strong> · Turno: ${esc(e.turno)} · Zona: ${esc(e.zona)}<br>Director(a): ${esc(e.director)} · Tel.: ${esc(e.telefono)}<br>${esc(e.domicilio)}</p><p><strong>Equipo USAER en esta escuela:</strong> ${equipoDe(e.id).map(u => esc(u.nombre) + ' (' + esc(CAT.roles[u.rol]) + ')').join(' · ') || 'Sin asignar'}</p>
     <p><strong>${DB.grupos.filter(g => g.escuelaId === e.id).length}</strong> grupos · <strong>${activos().filter(a => a.escuelaId === e.id).length}</strong> alumnos en atención</p>
     <div class="fila"><a href="#escuela/${e.id}">📁 Carpeta general (${vigentes().filter(r => r.escuelaId === e.id).length})</a><a href="#grupos">Ver carpetas de grupo</a>${ed(`<button class="sec chico" data-ed="${e.id}">Editar</button>`)}</div></div>`).join('') || '<p>No hay escuelas registradas.</p>');
   if ($('#nueva')) $('#nueva').onclick = () => formulario('Nueva escuela', CAMPOS_ESCUELA, {}, o => { DB.escuelas.push({ id: uid(), ...o }); guardar('Alta de escuela'); pintar(); });
@@ -406,7 +413,7 @@ function vAjustes(v) {
   v.innerHTML = `<h1>Ajustes</h1>
   <div class="caja alerta"><h2>Aviso importante</h2><p>EVAU es un <strong>prototipo</strong>. La información se guarda <strong>solo en este dispositivo y en este navegador</strong>, sin cifrar; no se envía a ningún servidor. Mientras no existan claves personales, cifrado y respaldo seguro, y la autoridad no autorice su uso, <strong>use únicamente datos ficticios</strong>.</p></div>
   <div class="caja"><h2>Datos del servicio de apoyo (encabezado del plan)</h2><p><strong>${esc(u.unidad)}</strong><br>CCT: ${esc(u.cct)} · Turno: ${esc(u.turno)}<br>${esc(u.domicilio)}<br>Director(a) USAER: ${esc(u.directora)}<br>Encabezado: ${esc(u.encabezado)}</p><p>Ciclo escolar: <strong>${esc(DB.config.ciclo)}</strong></p>${ed('<div class="fila"><button class="sec" id="usa">Editar datos del servicio</button><button class="sec" id="cfg">Cambiar ciclo escolar</button></div>')}</div>
-  <div class="caja"><h2>Profesionales</h2><table><tr><th>Nombre</th><th>Función</th><th></th></tr>${DB.usuarios.map(x => `<tr><td>${esc(x.nombre)}</td><td>${esc(CAT.roles[x.rol])}</td><td>${ed(`<button class="sec chico" data-u="${x.id}">Editar</button>`)}</td></tr>`).join('')}</table>${ed('<button class="sec" id="nu">＋ Agregar profesional</button>')}<p class="nota">Todas las personas entran con la clave 0000. Dirección consulta todo y escribe solo en la carpeta general de cada escuela. Si la directora también es maestra de apoyo, regístrela dos veces, una con cada función.</p></div>
+  <div class="caja"><h2>Profesionales</h2><table><tr><th>Nombre</th><th>Función</th><th>Escuelas que atiende</th><th></th></tr>${DB.usuarios.map(x => `<tr><td>${esc(x.nombre)}</td><td>${esc(CAT.roles[x.rol])}</td><td>${esc(x.rol === 'direccion' ? 'Todas (consulta)' : escuelasDe(x))}</td><td>${ed(`<button class="sec chico" data-u="${x.id}">Editar</button>`)}</td></tr>`).join('')}</table>${ed('<button class="sec" id="nu">＋ Agregar profesional</button>')}<p class="nota">Todas las personas entran con la clave 0000. Dirección consulta todo y escribe solo en la carpeta general de cada escuela. Si la directora también es maestra de apoyo, regístrela dos veces, una con cada función.</p><p class="nota">Cada maestra de apoyo suele atender una o dos escuelas, y cada escuela puede tener otro psicólogo. Marque las escuelas de cada persona: así el plan de intervención pone en «Participantes» solo al equipo de la escuela del alumno. La maestra de comunicación es una sola para toda la USAER: déjela sin escuelas marcadas y aparecerá en todas.</p></div>
   <div class="caja"><h2>Respaldo y trabajo en equipo</h2><p>El respaldo es un archivo con toda la información, las evidencias y los documentos de este dispositivo.</p>
   <div class="opcion-resp"><button id="exp">Descargar respaldo</button><p>Para guardar una copia, o para pasarle su trabajo a otra persona del equipo.</p></div>
   ${ed(`<div class="opcion-resp"><label class="boton" style="margin:0">Combinar un respaldo<input id="comb" type="file" accept="application/json,.json" hidden></label><p><strong>Recomendado.</strong> Junta lo del respaldo con lo de este dispositivo. No se pierde nada: si el mismo dato cambió en los dos lados, se queda el cambio más reciente. Antes de aplicar, EVAU le dice qué va a entrar.</p></div>
@@ -420,7 +427,7 @@ function vAjustes(v) {
   <div class="fila"><button class="sec" id="demo">Cargar datos de ejemplo</button><button class="peligro" id="borrar">Borrar todo</button></div>`)}</div>
   <div class="caja"><h2>Bitácora de acciones</h2><div class="tabla-scroll"><table><tr><th>Fecha y hora</th><th>Persona</th><th>Acción</th></tr>${DB.bitacora.slice(-40).reverse().map(b => `<tr><td>${esc(b.f)}</td><td>${esc(b.u)}</td><td>${esc(b.a)}</td></tr>`).join('')}</table></div></div>
   <p class="nota">EVAU versión ${VERSION}</p>`;
-  const cu = [{ k: 'nombre', label: 'Nombre', req: 1 }, { k: 'rol', label: 'Función', tipo: 'select', req: 1, opciones: Object.entries(CAT.roles) }];
+  const cu = [{ k: 'nombre', label: 'Nombre', req: 1 }, { k: 'rol', label: 'Función', tipo: 'select', req: 1, opciones: Object.entries(CAT.roles) }, { k: 'escuelas', label: 'Escuelas que atiende', tipo: 'checks', opciones: DB.escuelas.map(e => [e.id, e.nombre]), ayuda: 'Deje todas sin marcar si atiende todas las escuelas (por ejemplo, la maestra de comunicación, que es una sola para toda la USAER).' }];
   $('#exp').onclick = exportarRespaldo;
   if (!puedeEditar()) return;
   $('#usa').onclick = () => formulario('Datos del servicio de apoyo', CAMPOS_USAER, DB.usaer, o => { DB.usaer = o; guardar('Edición de datos del servicio'); pintar(); });

@@ -137,7 +137,7 @@ function participantesDe(a, p) {
   if (p.participantes.length) return p.participantes;
   const g = porId('grupos', a.grupoId) || {};
   const L = [{ funcion: 'Maestra(o) de grupo', nombre: g.docente || '' }, { funcion: (a.parentesco || 'Madre, padre o tutor') + ' del alumno', nombre: a.tutor || '' }];
-  [['apoyo', 'Maestra(o) de apoyo'], ['psicologia', 'Psicología'], ['comunicacion', 'Maestra(o) de comunicación']].forEach(([rol, f]) => DB.usuarios.filter(u => u.rol === rol).forEach(u => L.push({ funcion: f, nombre: u.nombre })));
+  [['apoyo', 'Maestra(o) de apoyo'], ['psicologia', 'Psicología'], ['comunicacion', 'Maestra(o) de comunicación']].forEach(([rol, f]) => DB.usuarios.filter(u => u.rol === rol && atiende(u, a.escuelaId)).forEach(u => L.push({ funcion: f, nombre: u.nombre })));
   return L;
 }
 const SECCIONES = [
