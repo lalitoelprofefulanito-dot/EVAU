@@ -79,6 +79,19 @@ function cargarEjemplo() {
   p.necesidades = [CAT.necesidadesPadres[3]];
   p.compromisos = [{ id: 'm1', accion: 'Lectura compartida en casa 10 minutos diarios con las tarjetas de sílabas.', responsables: 'Madre de familia; maestra de apoyo da seguimiento.', fecha: 'Todo el ciclo escolar' }];
   d.planes = { a1: p };
+  const cm = comVacio();   // comunicación: contenido de ejemplo, ficticio
+  Object.assign(cm.plan, { periodo: 'Oct-nov-dic 2026 / ene 2027 (ejemplo)', sesiones: '8', fecha: '2026-11-20', diagnostico: 'Hipoacusia (dato ficticio de ejemplo)' });
+  cm.plan.funciones[CAT.funcionesCom[0]] = ['Ordena tarjetas para formar oraciones de tres palabras (ejemplo).'];
+  cm.plan.funciones[CAT.funcionesCom[1]] = ['Ejercicios de soplo con dirección y duración (ejemplo).', 'Discriminación de sonidos con apoyo visual (ejemplo).'];
+  cm.plan.pda = ['Expresa ideas y experiencias por medio de mensajes breves (PDA de ejemplo).'];
+  cm.plan.contenidos['Lenguajes'] = ['Producción de mensajes breves (contenido de ejemplo).'];
+  cm.plan.metodologias = ['Acompañamiento en el aula', 'Trabajo individual: juego de mesa'];
+  cm.plan.materiales = ['Tarjetas con imágenes', 'Hojas blancas'];
+  Object.assign(cm.informe, { diagnostico: 'Texto de ejemplo del diagnóstico de comunicación.', etapa: 'Texto de ejemplo de la etapa del lenguaje.' });
+  cm.informe.componentes['Componente pragmático'] = 'Texto de ejemplo del componente pragmático.';
+  cm.informe.recPadres = ['Recomendación de ejemplo para la familia.']; cm.informe.recDocentes = ['Recomendación de ejemplo para el docente.'];
+  cm.actualizado = '2026-11-20';
+  d.comunicacion = { a5: cm };
   d.documentos = [{ id: 'd1', alumnoId: 'a1', tipo: 'Informe final', ciclo: '2025-2026', nombre: 'informe_final_2025-2026.pdf (ejemplo sin archivo)', tipoArchivo: '', fecha: '2026-07-08', sinArchivo: true }];
   d.valoraciones = { a1: { 0: { i: 'R', m: 'P', f: '', ev: 'Registros de lectura de octubre y noviembre.' } } };
   DB = d; calcularHuellas();
@@ -407,7 +420,8 @@ async function importarRespaldo(file) {
   } catch (e) { aviso('Ese archivo no es un respaldo válido de EVAU.'); }
 }
 const CAMPOS_USAER = [{ k: 'unidad', label: 'Nombre de la unidad (como va en el encabezado)', req: 1 }, { k: 'cct', label: 'CCT de la unidad' }, { k: 'turno', label: 'Turno' }, { k: 'domicilio', label: 'Domicilio' }, { k: 'directora', label: 'Director(a) de la USAER (firma Vo. Bo.)' },
-  { k: 'encabezado', label: 'Texto antes de la condición en el encabezado del plan', tipo: 'select', req: 1, opciones: ['CONDICIÓN DEL ALUMNO:', 'EL ALUMNO PRESENTA UNA BARRERA DE APRENDIZAJE Y PARTICIPACIÓN ASOCIADA A:'], ayuda: 'La revisión del plan señaló que las barreras están en el contexto y no en el alumno. Use la segunda opción solo si así lo exige el formato oficial.' }];
+  { k: 'encabezado', label: 'Texto antes de la condición en el encabezado del plan', tipo: 'select', req: 1, opciones: ['CONDICIÓN DEL ALUMNO:', 'EL ALUMNO PRESENTA UNA BARRERA DE APRENDIZAJE Y PARTICIPACIÓN ASOCIADA A:'], ayuda: 'La revisión del plan señaló que las barreras están en el contexto y no en el alumno. Use la segunda opción solo si así lo exige el formato oficial.' },
+  { k: 'dependencia', label: 'Dependencias del encabezado de los formatos de comunicación (una por renglón)', tipo: 'textarea', alto: 4 }, { k: 'zona', label: 'Zona escolar (ej.: ZONA ESCOLAR NÚM. 000)' }, { k: 'lugar', label: 'Lugar para la fecha de los documentos (ej.: Ciudad, Edo.)' }, { k: 'leyenda', label: 'Leyenda oficial del año (opcional, va en el informe final)' }];
 function vAjustes(v) {
   const u = DB.usaer;
   v.innerHTML = `<h1>Ajustes</h1>
