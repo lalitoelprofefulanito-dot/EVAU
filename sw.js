@@ -1,5 +1,5 @@
 /* EVAU · funcionamiento sin internet: guarda solo los archivos de la app (nunca datos de alumnos) */
-const CACHE = 'evau-1.4.1';
+const CACHE = 'evau-1.5.0';
 const ARCHIVOS = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(ARCHIVOS)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())); });

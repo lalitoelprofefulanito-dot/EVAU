@@ -104,23 +104,25 @@ function pantallaAcceso() {
   <form><label for="quien">¿Quién registra?</label>
   <select id="quien">${DB.usuarios.map(u => `<option value="${u.id}">${esc(u.nombre)} — ${esc(CAT.roles[u.rol])}</option>`).join('')}</select>
   <label for="clave">Clave</label><input id="clave" type="password" inputmode="numeric" autocomplete="off">
-  <p class="nota">La clave de este prototipo es 0000.</p>
+  <p class="nota">Si no ha cambiado su clave, es 0000.</p>
   <button type="submit" style="width:100%">Entrar</button></form></div>`;
-  $('form').onsubmit = e => {
+  $('form').onsubmit = async e => {
     e.preventDefault();
-    if ($('#clave').value !== CLAVE) { aviso('Clave incorrecta. La clave es 0000.'); return; }
-    USUARIO = porId('usuarios', $('#quien').value);
+    const u = porId('usuarios', $('#quien').value);
+    if (!(await claveCorrecta(u, $('#clave').value))) { aviso(u.clave ? 'Clave incorrecta. Si la olvidó, otra persona del equipo puede volverla a 0000 en Ajustes → Profesionales.' : 'Clave incorrecta. La clave es 0000.'); return; }
+    USUARIO = u;
     guardar('Inicio de sesión'); montar();
   };
   $('#clave').focus();
 }
 const MENU = [['inicio', 'Alumnos'], ['grupos', 'Carpetas de grupo'], ['informes', 'Informes'], ['resumen', 'Resumen'], ['estadistica', 'Estadística'], ['escuelas', 'Escuelas'], ['ajustes', 'Ajustes']];
 function montar() {
-  document.body.innerHTML = `<header class="barra"><span class="marca">EVAU</span><span class="sub">Expediente Digital USAER/UDEEI<br><strong>${esc(USUARIO.nombre)}</strong> · ${esc(CAT.roles[USUARIO.rol])}</span><button id="salir" class="chico">Salir</button></header>
+  document.body.innerHTML = `<header class="barra"><span class="marca">EVAU</span><span class="sub">Expediente Digital USAER/UDEEI<br><strong>${esc(USUARIO.nombre)}</strong> · ${esc(CAT.roles[USUARIO.rol])}</span><button id="ordenes" class="chico" aria-label="Pedir por voz">🗣 Pedir</button><button id="salir" class="chico">Salir</button></header>
   <div class="aviso-ficticio">PROTOTIPO · USAR SOLO CON DATOS FICTICIOS</div>
   <nav class="menu" aria-label="Secciones">${MENU.map(m => `<a href="#${m[0]}" data-m="${m[0]}">${m[1]}</a>`).join('')}</nav>
   <main id="vista"></main>${ed('<button class="fab" id="fab" aria-label="Dictar un nuevo registro">🎙 Nuevo registro</button>')}`;
   $('#salir').onclick = () => { USUARIO = null; pantallaAcceso(); };
+  $('#ordenes').onclick = () => abrirOrdenes(true);
   if ($('#fab')) $('#fab').onclick = () => {
     const [r, id] = location.hash.slice(1).split('/');
     nuevoRegistro(r === 'alumno' ? { alumnoId: id } : r === 'grupo' ? { grupoId: id } : r === 'escuela' ? { escuelaId: id } : {}, true);
@@ -154,11 +156,12 @@ function vInicio(v) {
     if ($('#demo')) $('#demo').onclick = async () => { const u = USUARIO.id; cargarEjemplo(); USUARIO = porId('usuarios', u); await guardar('Carga de datos de ejemplo'); montar(); aviso('Datos de ejemplo cargados.'); };
     return;
   }
-  v.innerHTML = `<label for="q" class="buscar-tit">🔎 Buscar alumno</label>
+  v.innerHTML = `${avisoRespaldo()}<label for="q" class="buscar-tit">🔎 Buscar alumno</label>
   <div class="buscar-fila"><input id="q" type="search" class="buscar" placeholder="Escriba o diga el nombre" autocomplete="off"><button id="qvoz" class="sec" type="button" aria-label="Buscar diciendo el nombre">🎙 Decir el nombre</button></div><p id="qest" class="voz-estado" role="status"></p>
   <div class="fila"><select id="fe" aria-label="Escuela" style="flex:1;min-width:11rem"><option value="">Todas las escuelas</option>${DB.escuelas.map(e => `<option value="${e.id}">${esc(e.nombre)}</option>`).join('')}</select>
   <select id="fs" aria-label="Estatus" style="flex:1;min-width:9rem"><option value="Activo">En atención</option><option value="">Todos</option><option value="Baja">Baja</option><option value="Egresado">Egresados</option></select>
   ${ed('<button id="nuevo" class="sec">＋ Nuevo alumno</button>')}</div><div id="lista" class="carpetas"></div>`;
+  activarAvisoRespaldo(v);
   let soloIds = null;   // cuando la búsqueda por voz duda, se muestran solo los candidatos
   const enFiltro = a => (!$('#fe').value || a.escuelaId === $('#fe').value) && (!$('#fs').value || a.estatus === $('#fs').value);
   const lista = () => {
@@ -353,8 +356,8 @@ function verBitacora(r) {
 }
 
 /* ---------- Alumnos: campos ---------- */
-function camposAlumno() {
-  return [{ k: 'nombre', label: 'Nombre completo (ficticio)', req: 1 }, { k: 'curp', label: 'CURP', ayuda: 'En este prototipo déjela en blanco o use una clave inventada.' }, { k: 'nacimiento', label: 'Fecha de nacimiento', tipo: 'date' }, { k: 'sexo', label: 'Sexo', tipo: 'select', req: 1, opciones: [['H', 'Hombre'], ['M', 'Mujer']] },
+function camposAlumno(alumnoId) {
+  return [{ k: 'nombre', label: 'Nombre completo (ficticio)', req: 1 }, { k: 'curp', label: 'CURP', normalizar: normCurp, validar: x => validarCurp(x, alumnoId), ayuda: 'Cópiela con cuidado del acta o la boleta: con la CURP, EVAU une al mismo alumno cuando se combinan respaldos de varios aparatos. EVAU revisa que tenga el formato correcto y que no esté repetida. Con datos de prueba, déjela en blanco.' }, { k: 'nacimiento', label: 'Fecha de nacimiento', tipo: 'date' }, { k: 'sexo', label: 'Sexo', tipo: 'select', req: 1, opciones: [['H', 'Hombre'], ['M', 'Mujer']] },
   { k: 'grupoId', label: 'Escuela y grupo', tipo: 'select', req: 1, opciones: DB.grupos.map(g => [g.id, nomGrupo(g) + ' — ' + ((porId('escuelas', g.escuelaId) || {}).nombre || '')]) },
   { k: 'condicion', label: 'Condición o categoría de la estadística', tipo: 'select', req: 1, opciones: CAT.condiciones, ayuda: 'Sin diagnóstico («En detección» y las tres «Dificultad severa…»): no lleva plan de intervención ni evaluación psicopedagógica, solo informe final del ciclo.' }, { k: 'estatus', label: 'Estatus', tipo: 'select', req: 1, opciones: ['Activo', 'Baja', 'Egresado'] },
   { k: 'tutor', label: 'Madre, padre o tutor' }, { k: 'parentesco', label: 'Parentesco' }, { k: 'telefono', label: 'Teléfono' }, { k: 'correo', label: 'Correo' }, { k: 'domicilio', label: 'Domicilio' },
@@ -386,6 +389,7 @@ async function exportarRespaldo() {
   const archivos = {};
   for (const m of [...DB.evidencias, ...DB.documentos]) { const b = await leerArchivo(m.id); if (b) archivos[m.id] = await aDataURL(b); }
   descargar('EVAU_respaldo_' + archivoSeguro(USUARIO ? USUARIO.nombre : '') + '_' + hoy() + '.json', JSON.stringify({ app: 'EVAU', version: VERSION, fecha: hoy(), de: USUARIO ? USUARIO.nombre : '', datos: DB, archivos }), 'application/json');
+  marcarRespaldo();
   guardar('Descarga de respaldo');
 }
 async function leerRespaldo(file) {
@@ -394,21 +398,26 @@ async function leerRespaldo(file) {
   return o;
 }
 /* Combinar: junta lo del respaldo con lo de este dispositivo. Primero muestra qué va a entrar. */
-async function combinarRespaldo(file) {
-  let o; try { o = await leerRespaldo(file); } catch (e) { aviso('Ese archivo no es un respaldo válido de EVAU.'); return; }
-  const { datos, resumen } = combinarEstados(DB, o.datos), de = o.de ? ' de ' + o.de : '';
-  const v = abrirModal(`<h2>Combinar el respaldo${esc(de)}</h2><p>Respaldo del ${esc(flarga(o.fecha) || 'día sin fecha')}${o.version ? ' · EVAU ' + esc(o.version) : ''}.</p>
-  <div class="caja ok"><h3>Esto es lo que va a pasar</h3><ul class="resumen-comb">${textoResumen(resumen).map(l => `<li>${esc(l)}</li>`).join('')}</ul></div>
+async function combinarRespaldo(files) {
+  files = Array.isArray(files) ? files : [files];
+  let acc = DB; const partes = [], archivos = {};
+  for (const f of files) {
+    let o; try { o = await leerRespaldo(f); } catch (e) { aviso('«' + f.name + '» no es un respaldo válido de EVAU.'); return; }
+    const r = combinarEstados(acc, o.datos); acc = r.datos; Object.assign(archivos, o.archivos || {});
+    partes.push({ o, resumen: r.resumen });
+  }
+  const tit = partes.length === 1 ? 'Combinar el respaldo' + (partes[0].o.de ? ' de ' + partes[0].o.de : '') : 'Combinar ' + partes.length + ' respaldos';
+  const v = abrirModal(`<h2>${esc(tit)}</h2>${partes.map(({ o, resumen }) => `<div class="caja ok"><h3>${esc(o.de ? 'De ' + o.de : 'Respaldo')} · ${esc(flarga(o.fecha) || 'sin fecha')}${o.version ? ' · EVAU ' + esc(o.version) : ''}</h3><ul class="resumen-comb">${textoResumen(resumen).map(l => `<li>${esc(l)}</li>`).join('')}</ul></div>`).join('')}
   <p>No se borra nada de este dispositivo, salvo lo que otra persona quitó después de que usted lo guardó.</p>
   <div class="fila"><button data-ok>Sí, combinar</button><button class="sec" data-no>Cancelar</button></div>`);
   $('[data-no]', v).onclick = () => v.cerrar();
   $('[data-ok]', v).onclick = async () => {
     v.cerrar();
-    const u = USUARIO.id; DB = datos;
+    const u = USUARIO.id; DB = acc;
     const usados = new Set([...DB.evidencias, ...DB.documentos].map(x => x.id));
-    for (const id in (o.archivos || {})) if (usados.has(id) && !(await leerArchivo(id))) await guardarArchivo(id, await (await fetch(o.archivos[id])).blob());
+    for (const id in archivos) if (usados.has(id) && !(await leerArchivo(id))) await guardarArchivo(id, await (await fetch(archivos[id])).blob());
     USUARIO = porId('usuarios', u) || USUARIO; calcularHuellas();
-    await guardar('Combinación del respaldo' + de); montar(); aviso('Respaldo combinado.');
+    await guardar(partes.length === 1 ? 'Combinación del respaldo' + (partes[0].o.de ? ' de ' + partes[0].o.de : '') : 'Combinación de ' + partes.length + ' respaldos'); montar(); aviso(partes.length === 1 ? 'Respaldo combinado.' : partes.length + ' respaldos combinados.');
   };
 }
 async function importarRespaldo(file) {
@@ -428,10 +437,10 @@ function vAjustes(v) {
   <div class="caja alerta"><h2>Aviso importante</h2><p>EVAU es un <strong>prototipo</strong>. La información se guarda <strong>solo en este dispositivo y en este navegador</strong>, sin cifrar; no se envía a ningún servidor. Mientras no existan claves personales, cifrado y respaldo seguro, y la autoridad no autorice su uso, <strong>use únicamente datos ficticios</strong>.</p></div>
   <div class="caja"><h2>Datos del servicio de apoyo (encabezado del plan)</h2><p><strong>${esc(u.unidad)}</strong><br>CCT: ${esc(u.cct)} · Turno: ${esc(u.turno)}<br>${esc(u.domicilio)}<br>Director(a) USAER: ${esc(u.directora)}<br>Encabezado: ${esc(u.encabezado)}<br>${esc(u.zona || '')}${u.lugar ? ' · ' + esc(u.lugar) : ''}</p>
   <p><strong>Logotipos del encabezado</strong> (opcionales; van en el plan y en los formatos de comunicación):</p><div class="fila logos-aj">${['logoIzq', 'logoDer'].map((k, i) => `<div>${u[k] ? `<img src="${u[k]}" alt="Logotipo ${i ? 'derecho' : 'izquierdo'}" style="height:56px;border:1px solid #000">` : `<em>Sin logotipo ${i ? 'derecho' : 'izquierdo'}</em>`}<br>${ed(`<label class="sec chico boton-archivo">${u[k] ? 'Cambiar' : 'Agregar'} ${i ? 'derecho' : 'izquierdo'}<input type="file" accept="image/*" data-logo="${k}" hidden></label>${u[k] ? ` <button class="sec chico" data-qlogo="${k}">Quitar</button>` : ''}`)}</div>`).join('')}</div><p>Ciclo escolar: <strong>${esc(DB.config.ciclo)}</strong></p>${ed('<div class="fila"><button class="sec" id="usa">Editar datos del servicio</button><button class="sec" id="cfg">Cambiar ciclo escolar</button></div>')}</div>
-  <div class="caja"><h2>Profesionales</h2><table><tr><th>Nombre</th><th>Función</th><th>Escuelas que atiende</th><th></th></tr>${DB.usuarios.map(x => `<tr><td>${esc(x.nombre)}</td><td>${esc(CAT.roles[x.rol])}</td><td>${esc(x.rol === 'direccion' ? 'Todas (consulta)' : escuelasDe(x))}</td><td>${ed(`<button class="sec chico" data-u="${x.id}">Editar</button>`)}</td></tr>`).join('')}</table>${ed('<button class="sec" id="nu">＋ Agregar profesional</button>')}<p class="nota">Todas las personas entran con la clave 0000. Dirección consulta todo y escribe solo en la carpeta general de cada escuela. Si la directora también es maestra de apoyo, regístrela dos veces, una con cada función.</p><p class="nota">Cada maestra de apoyo suele atender una o dos escuelas, y cada escuela puede tener otro psicólogo. Marque las escuelas de cada persona: así el plan de intervención pone en «Participantes» solo al equipo de la escuela del alumno. La maestra de comunicación es una sola para toda la USAER: déjela sin escuelas marcadas y aparecerá en todas.</p></div>
+  <div class="caja"><h2>Profesionales</h2><table><tr><th>Nombre</th><th>Función</th><th>Escuelas que atiende</th><th>Clave</th><th></th></tr>${DB.usuarios.map(x => `<tr><td>${esc(x.nombre)}</td><td>${esc(CAT.roles[x.rol])}</td><td>${esc(x.rol === 'direccion' ? 'Todas (consulta)' : escuelasDe(x))}</td><td>${x.clave ? 'Propia' + ed(` <button class="sec chico" data-reset="${x.id}">Volver a 0000</button>`) : '0000'}</td><td>${ed(`<button class="sec chico" data-u="${x.id}">Editar</button>`)}</td></tr>`).join('')}</table>${ed('<button class="sec" id="nu">＋ Agregar profesional</button>')}<div class="fila"><button class="sec" id="miclave">🔑 Cambiar mi clave</button></div><p class="nota">Cada persona entra con 0000 hasta que cambie su clave con «Cambiar mi clave». La clave protege la entrada, pero <strong>no cifra</strong> la información. Dirección consulta todo y escribe solo en la carpeta general de cada escuela. Si la directora también es maestra de apoyo, regístrela dos veces, una con cada función.</p><p class="nota">Cada maestra de apoyo suele atender una o dos escuelas, y cada escuela puede tener otro psicólogo. Marque las escuelas de cada persona: así el plan de intervención pone en «Participantes» solo al equipo de la escuela del alumno. La maestra de comunicación es una sola para toda la USAER: déjela sin escuelas marcadas y aparecerá en todas.</p></div>
   <div class="caja"><h2>Respaldo y trabajo en equipo</h2><p>El respaldo es un archivo con toda la información, las evidencias y los documentos de este dispositivo.</p>
-  <div class="opcion-resp"><button id="exp">Descargar respaldo</button><p>Para guardar una copia, o para pasarle su trabajo a otra persona del equipo.</p></div>
-  ${ed(`<div class="opcion-resp"><label class="boton" style="margin:0">Combinar un respaldo<input id="comb" type="file" accept="application/json,.json" hidden></label><p><strong>Recomendado.</strong> Junta lo del respaldo con lo de este dispositivo. No se pierde nada: si el mismo dato cambió en los dos lados, se queda el cambio más reciente. Antes de aplicar, EVAU le dice qué va a entrar.</p></div>
+  <div class="opcion-resp"><button id="exp">Descargar respaldo</button><p>Para guardar una copia, o para pasarle su trabajo a otra persona del equipo. <strong>Último respaldo descargado en este aparato:</strong> ${ultimoRespaldo() ? esc(flarga(ultimoRespaldo())) : 'ninguno'}.</p></div>
+  ${ed(`<div class="opcion-resp"><label class="boton" style="margin:0">Combinar respaldos<input id="comb" type="file" accept="application/json,.json" multiple hidden></label><p><strong>Recomendado.</strong> Puede elegir <strong>varios archivos a la vez</strong> (por ejemplo, el corte de fin de mes de cada escuela). Junta lo del respaldo con lo de este dispositivo. No se pierde nada: si el mismo dato cambió en los dos lados, se queda el cambio más reciente. Antes de aplicar, EVAU le dice qué va a entrar.</p></div>
   <div class="opcion-resp"><label class="boton peligro" style="margin:0">Reemplazar todo con un respaldo<input id="imp" type="file" accept="application/json,.json" hidden></label><p>Solo para un dispositivo nuevo o vacío: borra lo de este dispositivo y deja únicamente lo del respaldo.</p></div>
   <details class="guia"><summary>Cómo trabajar en equipo con respaldos</summary><ol>
   <li>La maestra de apoyo da de alta sus escuelas, grupos, alumnos y a las personas del equipo. Luego descarga un respaldo.</li>
@@ -443,6 +452,8 @@ function vAjustes(v) {
   <div class="caja"><h2>Bitácora de acciones</h2><div class="tabla-scroll"><table><tr><th>Fecha y hora</th><th>Persona</th><th>Acción</th></tr>${DB.bitacora.slice(-40).reverse().map(b => `<tr><td>${esc(b.f)}</td><td>${esc(b.u)}</td><td>${esc(b.a)}</td></tr>`).join('')}</table></div></div>
   <p class="nota">EVAU versión ${VERSION}</p>`;
   const cu = [{ k: 'nombre', label: 'Nombre', req: 1 }, { k: 'rol', label: 'Función', tipo: 'select', req: 1, opciones: Object.entries(CAT.roles) }, { k: 'escuelas', label: 'Escuelas que atiende', tipo: 'checks', opciones: DB.escuelas.map(e => [e.id, e.nombre]), ayuda: 'Deje todas sin marcar si atiende todas las escuelas (por ejemplo, la maestra de comunicación, que es una sola para toda la USAER).' }];
+  $('#miclave').onclick = () => cambiarMiClave();
+  document.querySelectorAll('[data-reset]').forEach(b => b.onclick = () => { const x = porId('usuarios', b.dataset.reset); confirmar('La clave de ' + x.nombre + ' volverá a ser 0000.', async () => { delete x.clave; if (USUARIO.id === x.id) USUARIO = x; await guardar('Clave de ' + x.nombre + ' vuelta a 0000'); pintar(); aviso('Listo: la clave de ' + x.nombre + ' es 0000.'); }); });
   $('#exp').onclick = exportarRespaldo;
   if (!puedeEditar()) return;
   document.querySelectorAll('[data-logo]').forEach(inp => inp.onchange = async () => { const f = inp.files[0]; if (!f) return; if (f.size > 400000) { aviso('La imagen es muy pesada (más de 400 KB). Use una más chica.'); return; } DB.usaer[inp.dataset.logo] = await aDataURL(f); guardar('Logotipo del encabezado'); pintar(); });
@@ -452,7 +463,7 @@ function vAjustes(v) {
   $('#nu').onclick = () => formulario('Agregar profesional', cu, {}, o => { DB.usuarios.push({ id: uid(), ...o }); guardar('Alta de profesional'); pintar(); });
   v.querySelectorAll('[data-u]').forEach(b => b.onclick = () => { const x = porId('usuarios', b.dataset.u); formulario('Editar profesional', cu, x, o => { if (x.id === USUARIO.id && o.rol === 'direccion') { aviso('No puede quitarse su propio permiso de edición.'); return; } Object.assign(x, o); guardar('Edición de profesional'); montar(); }); });
   $('#imp').onchange = e => { const f = e.target.files[0]; e.target.value = ''; if (f) confirmar('Reemplazar todo borra la información actual de este dispositivo y deja solo la del respaldo. Si quiere juntar las dos, use «Combinar un respaldo».', () => importarRespaldo(f), 'Sí, reemplazar todo'); };
-  $('#comb').onchange = e => { const f = e.target.files[0]; e.target.value = ''; if (f) combinarRespaldo(f); };
+  $('#comb').onchange = e => { const fs = [...e.target.files]; e.target.value = ''; if (fs.length) combinarRespaldo(fs); };
   $('#demo').onclick = () => confirmar('Cargar los datos de ejemplo reemplaza toda la información actual.', async () => { const uu = USUARIO.id; await borrarArchivos(); cargarEjemplo(); USUARIO = porId('usuarios', uu) || DB.usuarios[0]; await guardar('Carga de datos de ejemplo'); location.hash = '#inicio'; montar(); });
   $('#borrar').onclick = () => confirmar('Se borrará TODA la información y las evidencias de este dispositivo. No se puede deshacer. Descargue antes un respaldo.', async () => { await borrarArchivos(); DB = estadoVacio(); calcularHuellas(); USUARIO = DB.usuarios[0]; await guardar('Borrado total'); location.hash = '#inicio'; montar(); }, 'Sí, borrar todo');
 }

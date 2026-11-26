@@ -1,6 +1,6 @@
 'use strict';
 /* EVAU · Expediente Vivo de Atención USAER/UDEEI · núcleo: utilidades, catálogos, almacenamiento y dictado */
-const VERSION = '1.4.1';
+const VERSION = '1.5.0';
 const CLAVE = '0000';
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -213,7 +213,8 @@ const tiempo = x => (x && x._m && x._m.t) || '';
    Devuelve { datos, resumen } y NO toca DB: así se puede mostrar el resumen antes de aplicar. */
 function combinarEstados(local, entrante) {
   const L = JSON.parse(JSON.stringify(local)), E = migrar(JSON.parse(JSON.stringify(entrante)));
-  const res = { nuevos: {}, actualizados: {}, quitados: {}, conflictos: 0, porPersona: {} };
+  const res = { nuevos: {}, actualizados: {}, quitados: {}, conflictos: 0, porPersona: {}, unidosCurp: 0 };
+  unirPorCurp(L, E, res);
   const suma = (o, c) => o[c] = (o[c] || 0) + 1;
   /* Marcas de borrado de los dos lados (la más reciente de cada dato) */
   const marcas = {};
@@ -260,6 +261,7 @@ function textoResumen(r) {
   Object.entries(r.porPersona).forEach(([p, o]) => lin.push('De ' + p + ': ' + lista(o) + '.'));
   if (Object.keys(r.actualizados).length) lin.push('Se actualizan con el cambio más reciente: ' + lista(r.actualizados) + '.');
   if (Object.keys(r.quitados).length) lin.push('Se quitan porque alguien los quitó después: ' + lista(r.quitados) + '.');
+  if (r.unidosCurp) lin.push(r.unidosCurp + (r.unidosCurp === 1 ? ' alumno dado de alta en otro aparato tiene' : ' alumnos dados de alta en otro aparato tienen') + ' la misma CURP que uno de aquí: se unen en una sola carpeta.');
   if (r.conflictos) lin.push(r.conflictos + (r.conflictos === 1 ? ' dato cambió' : ' datos cambiaron') + ' en los dos lados sin fecha (datos de antes de la versión 1.3): se conservó lo de este dispositivo.');
   return lin.length ? lin : ['No hay nada nuevo: este dispositivo ya tiene todo lo del respaldo.'];
 }
@@ -313,7 +315,9 @@ function formulario(titulo, campos, valores, alGuardar, intro) {
       if (c.tipo === 'checks') out[c.k] = [...el.querySelectorAll('input:checked')].map(i => i.value);
       else if (c.tipo === 'lista') out[c.k] = lineas(el.value);
       else out[c.k] = el.value.trim();
+      if (c.normalizar) out[c.k] = c.normalizar(out[c.k]);
       if (c.req && !out[c.k]) { aviso('Falta: ' + c.label); el.focus(); return; }
+      if (c.validar) { const msg = c.validar(out[c.k]); if (msg) { aviso(msg); el.focus(); return; } }
     }
     v.cerrar(); alGuardar(out);
   };

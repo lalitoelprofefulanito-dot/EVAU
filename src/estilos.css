@@ -154,3 +154,5 @@ label.boton{display:inline-block}
 .hoja .logos{display:flex;justify-content:space-between;align-items:center;margin-bottom:6pt}
 .hoja .logos img{height:1.4cm;width:auto}
 .boton-archivo{display:inline-block;cursor:pointer;border:2px solid #0f2f5c;border-radius:8px;padding:.3rem .7rem;font-weight:bold}
+.resaltar{outline:4px solid #f5a300;outline-offset:4px}
+.aviso-resp p{margin:0 0 .5rem}

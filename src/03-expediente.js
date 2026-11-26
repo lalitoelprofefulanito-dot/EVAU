@@ -41,7 +41,7 @@ function tDatos(t, a) {
   <h2>Datos de salud</h2><table>${d('Condición o categoría (estadística)', a.condicion)}${d('Diagnóstico', a.diagnostico)}${d('Medicación', a.medicacion)}${d('Especialistas o instituciones externas', a.especialistas)}${d('Observaciones', a.obsSalud)}</table>${ed('<button id="edit">Editar datos</button>')}</div>`;
   t.querySelectorAll('[data-evs]').forEach(pintarMiniaturas);
   if (!puedeEditar()) return;
-  $('#edit').onclick = () => formulario('Editar alumno', camposAlumno(), a, o => { Object.assign(a, o); a.escuelaId = porId('grupos', a.grupoId).escuelaId; guardar('Edición de alumno'); pintar(); });
+  $('#edit').onclick = () => formulario('Editar alumno', camposAlumno(a.id), a, o => { Object.assign(a, o); a.escuelaId = porId('grupos', a.grupoId).escuelaId; guardar('Edición de alumno'); pintar(); });
   $('#cons').onclick = () => formulario('Consentimiento informado', [{ k: 'estado', label: 'Estado', tipo: 'select', req: 1, opciones: ['Pendiente', 'Activo', 'Retirado por la familia', 'Vencido'] }, { k: 'fecha', label: 'Fecha de firma', tipo: 'date' }, { k: 'vigencia', label: 'Vigente hasta', tipo: 'date' }, { k: 'obs', label: 'Observaciones o condiciones de la familia', tipo: 'textarea' }], c, o => { a.consentimiento = { ...c, ...o }; guardar('Actualización de consentimiento'); pintar(); });
   $('#ndoc').onclick = () => {
     const v = abrirModal(`<h2>Agregar documento</h2><form><label for="d_tipo">Tipo de documento</label><select id="d_tipo">${CAT.docTipos.map(x => `<option>${esc(x)}</option>`).join('')}</select>

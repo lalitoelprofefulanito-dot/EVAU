@@ -1,4 +1,4 @@
-# Formatos e insumos para seguir actualizando EVAU (v1.4.1 · auditoría del 24/11/2026)
+# Formatos e insumos para seguir actualizando EVAU (v1.5.0 · actualizada el 25/11/2026)
 
 ## A. Ya entregados y ya usados en la app
 | Insumo | Fecha | Qué resolvió en EVAU |
@@ -9,6 +9,7 @@
 | Documento «Dictado por voz en aplicaciones web» | 23/11/2026 | Reglas del dictado |
 | **Plantilla interna de inicio 2026-2027** | 23/11/2026 | Datos de la USAER (zona 004, CCT, turno matutino, domicilio, directora), las 7 personas del equipo con su función y sus escuelas, horario del personal (8:00 a 12:30) y **catálogo oficial de condiciones** (estructura del 911 USAER-1, con «Otras condiciones: Dificultad severa de conducta / comunicación / aprendizaje») |
 | **Ámbito de inicio 2026-2027** | 23/11/2026 | Las 7 escuelas con CCT, zona, domicilio y director(a); 44 grupos con su docente |
+| Conversación con la maestra de apoyo (audios y mensajes) | 25/11/2026 | Modelo de trabajo sin servidor (cada quien en su aparato o uno por escuela; se juntan respaldos), pedir por voz, clave personal, CURP para unir alumnos, aviso de respaldo y combinar varios (1.5.0) |
 | Plan de intervención individual de comunicación e Informe final de comunicación | 24/11/2026 | Pestaña «Comunicación» (1.4.0), encabezado institucional y logotipos (1.4.1) |
 
 ## B. Pendientes que se dieron por resueltos con lo entregado (ya no se piden)
@@ -34,6 +35,6 @@
 ### Prioridad 3 · Para usar datos reales (hoy NO se debe)
 14. Claves personales en lugar de 0000, cifrado y respaldo automático.
 15. Aviso de privacidad de la autoridad responsable y **autorización de la directora** para usar el sistema.
-16. **Sincronización:** quién administra los datos del equipo y con qué cuentas (el equipo no tiene cuentas institucionales de Google Workspace).
+16. **Juntar la información:** ya se acordó hacerlo con respaldos y «Combinar» (sin servidor). Falta decidir **qué aparatos** (el de cada quien, uno por escuela o uno de la USAER) y **quién junta** los respaldos y cada cuándo.
 ### Decisión de Eduardo (no va en el formulario)
 17. Si EVAU se comparte con toda la USAER y en qué condiciones.
