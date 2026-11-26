@@ -1,7 +1,7 @@
-# EVAU · Expediente Vivo de Atención USAER/UDEEI (versión 1.7.1)
+# EVAU · Expediente Vivo de Atención USAER/UDEEI (versión 1.7.2)
 
-Prototipo de aplicación web (PWA) para sustituir la carpeta física de la maestra de apoyo.
-**Usar solo con datos ficticios.** Clave de acceso: **0000**.
+Aplicación web (PWA) para sustituir la carpeta física de la maestra de apoyo. Clave de acceso: **0000** hasta que cada persona cambie la suya.
+**En este repositorio público solo van datos ficticios de ejemplo:** los datos reales viven únicamente en los aparatos del equipo y en sus respaldos.
 
 ## Cómo usarla
 - **Probar en la computadora:** abrir `index.html` con Chrome o Edge.
@@ -58,7 +58,7 @@ Para cambiar algo: editar `src/`, ejecutar `python3 herramientas/construir.py .`
 1. Probar el dictado real en el celular de la maestra (Android o iPhone) y ajustar la separación actividad/observación.
 2. Confirmar con la dirección de la USAER el encabezado del plan («Condición del alumno» o el texto original) y el resto del formato.
 3. Validar los tipos de registro y las marcas con las maestras.
-4. Para datos reales: claves personales, cifrado, respaldo automático, servidor para trabajo en equipo y autorización de la autoridad.
+4. Cifrado de la información (la clave personal y el aviso de respaldo ya existen).
 5. Grabación de audio dentro de la app; entrega-recepción entre ciclos.
 6. **Sincronización automática** (pedido de la directora, 19/11/2026; la 1.3 ya combina respaldos a mano). Siguiente paso: probar con un prototipo las cuentas de Gmail y Drive de cada persona: un espacio por maestro de apoyo (4) donde da de alta sus escuelas, su psicólogo por escuela, la maestra de comunicación y la directora. Requiere servidor y decidir cómo entran comunicación y dirección a los cuatro espacios.
 7. Plan de atención de psicología (recibido el 23/11/2026, falta integrarlo) e informe psicológico, informe psicopedagógico e informe final del maestro de apoyo (formatos por recibir). Comunicación ya está en la 1.4.0.

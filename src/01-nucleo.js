@@ -1,6 +1,6 @@
 'use strict';
 /* EVAU · Expediente Vivo de Atención USAER/UDEEI · núcleo: utilidades, catálogos, almacenamiento y dictado */
-const VERSION = '1.7.1';
+const VERSION = '1.7.2';
 const CLAVE = '0000';
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -506,7 +506,7 @@ function dictarRegistro(act, obs, boton, estado, cambiar) {
 
 /* Patrón 5 · guía plegable con un ejemplo comprobado: el ejemplo pasa por el mismo lector que usa la pantalla */
 const EJEMPLO_REGISTRO = ['Se trabajó lectura de cuento', 'respondió dos preguntas sin ayuda punto en la tercera pidió apoyo'];
-const AVISO_AUDIO = 'El navegador manda el audio a su servicio de reconocimiento (en Chrome, a Google) para convertirlo en texto. Mientras EVAU use datos ficticios no hay problema; con datos reales hay que revisar antes las normas de la autoridad.';
+const AVISO_AUDIO = 'El navegador manda el audio a su servicio de reconocimiento (en Chrome, a Google) para convertirlo en texto. EVAU no guarda grabaciones: solo el texto que usted revisa.';
 function guiaRegistro() {
   const r = repartirDictado(EJEMPLO_REGISTRO, { act: '', obs: '', modo: 'act' });
   return `<details class="guia"><summary>Cómo dictar aquí</summary><ol><li>Toque <strong>🎙 Dictar</strong> y hable con calma.</li><li>Diga primero <strong>la actividad</strong> y haga una pausa.</li><li>Luego diga <strong>lo que observó</strong>. Puede hacer pausas para pensar: el micrófono sigue encendido hasta que toque <strong>⏹ Detener</strong>.</li><li>Diga «punto» para separar ideas. Si corrige una palabra a mano, lo siguiente se agrega después.</li></ol>

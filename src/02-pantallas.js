@@ -112,8 +112,7 @@ function cargarEjemplo() {
 
 /* ---------- Acceso y estructura ---------- */
 function pantallaAcceso() {
-  document.body.innerHTML = `<div class="aviso-ficticio">PROTOTIPO · USAR SOLO CON DATOS FICTICIOS</div>
-  <div class="acceso"><h1>EVAU</h1><p><strong>Expediente Digital USAER/UDEEI</strong><br>La carpeta del alumno, en el celular.</p>
+  document.body.innerHTML = `  <div class="acceso"><h1>EVAU</h1><p><strong>Expediente Digital USAER/UDEEI</strong><br>La carpeta del alumno, en el celular.</p>
   <form><label for="quien">¿Quién registra?</label>
   <select id="quien">${DB.usuarios.map(u => `<option value="${u.id}">${esc(u.nombre)} — ${esc(CAT.roles[u.rol])}</option>`).join('')}</select>
   <label for="clave">Clave</label><input id="clave" type="password" inputmode="numeric" autocomplete="off">
@@ -131,8 +130,7 @@ function pantallaAcceso() {
 const MENU = [['inicio', 'Alumnos'], ['grupos', 'Carpetas de grupo'], ['informes', 'Informes'], ['resumen', 'Resumen'], ['estadistica', 'Estadística'], ['escuelas', 'Escuelas'], ['ajustes', 'Ajustes']];
 function montar() {
   document.body.innerHTML = `<header class="barra"><span class="marca">EVAU</span><span class="sub">Expediente Digital USAER/UDEEI<br><strong>${esc(USUARIO.nombre)}</strong> · ${esc(CAT.roles[USUARIO.rol])}</span><button id="ordenes" class="chico" aria-label="Pedir por voz">🗣 Pedir</button><button id="salir" class="chico">Salir</button></header>
-  <div class="aviso-ficticio">PROTOTIPO · USAR SOLO CON DATOS FICTICIOS</div>
-  <nav class="menu" aria-label="Secciones">${MENU.map(m => `<a href="#${m[0]}" data-m="${m[0]}">${m[1]}</a>`).join('')}</nav>
+    <nav class="menu" aria-label="Secciones">${MENU.map(m => `<a href="#${m[0]}" data-m="${m[0]}">${m[1]}</a>`).join('')}</nav>
   <main id="vista"></main>${ed('<button class="fab" id="fab" aria-label="Dictar un nuevo registro">🎙 Nuevo registro</button>')}`;
   $('#salir').onclick = () => { USUARIO = null; pantallaAcceso(); };
   $('#ordenes').onclick = () => abrirOrdenes(true);
@@ -370,7 +368,7 @@ function verBitacora(r) {
 
 /* ---------- Alumnos: campos ---------- */
 function camposAlumno(alumnoId) {
-  return [{ k: 'nombre', label: 'Nombre completo (ficticio)', req: 1 }, { k: 'curp', label: 'CURP', normalizar: normCurp, validar: x => validarCurp(x, alumnoId), ayuda: 'Cópiela con cuidado del acta o la boleta: con la CURP, EVAU une al mismo alumno cuando se combinan respaldos de varios aparatos. EVAU revisa que tenga el formato correcto y que no esté repetida. Con datos de prueba, déjela en blanco.' }, { k: 'nacimiento', label: 'Fecha de nacimiento', tipo: 'date' }, { k: 'sexo', label: 'Sexo', tipo: 'select', req: 1, opciones: [['H', 'Hombre'], ['M', 'Mujer']] },
+  return [{ k: 'nombre', label: 'Nombre completo', req: 1 }, { k: 'curp', label: 'CURP', normalizar: normCurp, validar: x => validarCurp(x, alumnoId), ayuda: 'Cópiela con cuidado del acta o la boleta: con la CURP, EVAU une al mismo alumno cuando se combinan respaldos de varios aparatos. EVAU revisa que tenga el formato correcto y que no esté repetida.' }, { k: 'nacimiento', label: 'Fecha de nacimiento', tipo: 'date' }, { k: 'sexo', label: 'Sexo', tipo: 'select', req: 1, opciones: [['H', 'Hombre'], ['M', 'Mujer']] },
   { k: 'grupoId', label: 'Escuela y grupo', tipo: 'select', req: 1, opciones: DB.grupos.map(g => [g.id, nomGrupo(g) + ' — ' + ((porId('escuelas', g.escuelaId) || {}).nombre || '')]) },
   { k: 'condicion', label: 'Condición o categoría de la estadística', tipo: 'select', req: 1, opciones: CAT.condiciones, ayuda: 'Sin diagnóstico («En detección» y las tres «Dificultad severa…»): no lleva plan de intervención ni evaluación psicopedagógica, solo informe final del ciclo.' }, { k: 'estatus', label: 'Estatus', tipo: 'select', req: 1, opciones: ['Activo', 'Baja', 'Egresado'] },
   { k: 'tutor', label: 'Madre, padre o tutor' }, { k: 'parentesco', label: 'Parentesco' }, { k: 'telefono', label: 'Teléfono' }, { k: 'correo', label: 'Correo' }, { k: 'domicilio', label: 'Domicilio' },
@@ -447,7 +445,7 @@ const CAMPOS_USAER = [{ k: 'unidad', label: 'Nombre de la unidad (como va en el 
 function vAjustes(v) {
   const u = DB.usaer;
   v.innerHTML = `<h1>Ajustes</h1>
-  <div class="caja alerta"><h2>Aviso importante</h2><p>EVAU es un <strong>prototipo</strong>. La información se guarda <strong>solo en este dispositivo y en este navegador</strong>, sin cifrar; no se envía a ningún servidor. Mientras no existan claves personales, cifrado y respaldo seguro, y la autoridad no autorice su uso, <strong>use únicamente datos ficticios</strong>.</p></div>
+  <div class="caja"><h2>Cuidado de la información</h2><p>La información se guarda <strong>solo en este dispositivo y en este navegador</strong>, sin cifrar; no se envía a ningún servidor. Use <strong>bloqueo de pantalla</strong> en el aparato, cambie su clave, descargue su respaldo seguido y compártalo solo con el equipo.</p></div>
   <div class="caja"><h2>Datos del servicio de apoyo (encabezado del plan)</h2><p><strong>${esc(u.unidad)}</strong><br>CCT: ${esc(u.cct)} · Turno: ${esc(u.turno)}<br>${esc(u.domicilio)}<br>Director(a) USAER: ${esc(u.directora)}<br>Encabezado: ${esc(u.encabezado)}<br>${esc(u.zona || '')}${u.lugar ? ' · ' + esc(u.lugar) : ''}</p>
   <p><strong>Logotipos del encabezado</strong> (opcionales; van en el plan y en los formatos de comunicación):</p><div class="fila logos-aj">${['logoIzq', 'logoDer'].map((k, i) => `<div>${u[k] ? `<img src="${u[k]}" alt="Logotipo ${i ? 'derecho' : 'izquierdo'}" style="height:56px;border:1px solid #000">` : `<em>Sin logotipo ${i ? 'derecho' : 'izquierdo'}</em>`}<br>${ed(`<label class="sec chico boton-archivo">${u[k] ? 'Cambiar' : 'Agregar'} ${i ? 'derecho' : 'izquierdo'}<input type="file" accept="image/*" data-logo="${k}" hidden></label>${u[k] ? ` <button class="sec chico" data-qlogo="${k}">Quitar</button>` : ''}`)}</div>`).join('')}</div><p>Ciclo escolar: <strong>${esc(DB.config.ciclo)}</strong></p>${ed('<div class="fila"><button class="sec" id="usa">Editar datos del servicio</button><button class="sec" id="cfg">Cambiar ciclo escolar</button></div>')}</div>
   <div class="caja"><h2>Profesionales</h2><table><tr><th>Nombre</th><th>Función</th><th>Escuelas que atiende</th><th>Clave</th><th></th></tr>${DB.usuarios.map(x => `<tr><td>${esc(x.nombre)}</td><td>${esc(CAT.roles[x.rol])}</td><td>${esc(x.rol === 'direccion' ? 'Todas (consulta)' : escuelasDe(x))}</td><td>${x.clave ? 'Propia' + ed(` <button class="sec chico" data-reset="${x.id}">Volver a 0000</button>`) : '0000'}</td><td>${ed(`<button class="sec chico" data-u="${x.id}">Editar</button>`)}</td></tr>`).join('')}</table>${ed('<button class="sec" id="nu">＋ Agregar profesional</button>')}<div class="fila"><button class="sec" id="miclave">🔑 Cambiar mi clave</button></div><p class="nota">Cada persona entra con 0000 hasta que cambie su clave con «Cambiar mi clave». La clave protege la entrada, pero <strong>no cifra</strong> la información. Dirección consulta todo y escribe solo en la carpeta general de cada escuela. Si la directora también es maestra de apoyo, regístrela dos veces, una con cada función.</p><p class="nota">Cada maestra de apoyo suele atender una o dos escuelas, y cada escuela puede tener otro psicólogo. Marque las escuelas de cada persona: así el plan de intervención pone en «Participantes» solo al equipo de la escuela del alumno. La maestra de comunicación es una sola para toda la USAER: déjela sin escuelas marcadas y aparecerá en todas.</p></div>
@@ -460,7 +458,7 @@ function vAjustes(v) {
   <li>Cada persona del equipo abre ese respaldo <strong>una sola vez</strong> con «Reemplazar todo», en su propio celular o computadora.</li>
   <li>Desde ahí, cada quien registra en su dispositivo. Cuando quiera compartir, descarga su respaldo y se lo pasa a la maestra de apoyo.</li>
   <li>La maestra de apoyo lo abre con «Combinar» y después comparte su propio respaldo, para que todos queden iguales.</li></ol>
-  <p class="nota">No den de alta al mismo alumno en dos dispositivos distintos: saldría dos veces. Con datos reales, no pasen los respaldos por WhatsApp.</p></details>
+  <p class="nota">No den de alta al mismo alumno en dos dispositivos distintos: saldría dos veces. No pasen los respaldos por WhatsApp: usen cable, memoria USB o un Drive compartido solo con el equipo.</p></details>
   <div class="fila"><button class="sec" id="demo">Cargar datos de ejemplo</button><button class="peligro" id="borrar">Borrar todo</button></div>`)}</div>
   <div class="caja"><h2>Bitácora de acciones</h2><div class="tabla-scroll"><table><tr><th>Fecha y hora</th><th>Persona</th><th>Acción</th></tr>${DB.bitacora.slice(-40).reverse().map(b => `<tr><td>${esc(b.f)}</td><td>${esc(b.u)}</td><td>${esc(b.a)}</td></tr>`).join('')}</table></div></div>
   <p class="nota">EVAU versión ${VERSION}</p>`;

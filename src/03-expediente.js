@@ -264,7 +264,7 @@ function armarInforme(a, tipo, desde, hasta) {
   const porAreaHTML = obj => Object.entries(obj).map(([ar, rs]) => `<p><strong>${esc(ar)}</strong></p>${ul(rs.map(vineta))}`).join('');
   let n = 1; const h = t => `<h2>${n++}. ${t}</h2>`;
   let s = `<h1>${fam ? 'INFORME PARA LA FAMILIA' : 'INFORME DE SEGUIMIENTO DEL ALUMNO'}<br>${fam ? '' : esc(tipo.replace('Seguimiento — ', '').toUpperCase())}</h1>
-  <p style="text-align:center"><strong>Elaborado con el registro cronológico · formato de uso común (no oficial) · datos ficticios de prueba</strong></p>
+  <p style="text-align:center"><strong>Elaborado con el registro cronológico · formato de uso común (no oficial)</strong></p>
   ${h('Datos de identificación')}<table>${fila('Escuela', e.nombre, 'CCT', e.cct)}${fila('Servicio de apoyo', DB.usaer.unidad, 'Ciclo escolar', DB.config.ciclo)}${fila('Alumno', a.nombre, 'Grado y grupo', nomGrupo(g))}${fila('Periodo', 'Del ' + flarga(desde) + ' al ' + flarga(hasta), 'Registros analizados', String(an.regs.length))}${fila('Elaboró', USUARIO.nombre, 'Fecha', flarga(hoy()))}</table>`;
   if (fam) {
     s += h('Lo que ha logrado') + (Object.keys(an.logros).length ? porAreaHTML(an.logros) : vacio('No hay logros marcados en el periodo.'));

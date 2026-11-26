@@ -33,7 +33,7 @@
 9. **Marcas** (logro, dificultad, apoyo brindado) y **niveles de apoyo** (ayuda total, modelado, indicación verbal, recordatorio visual, independiente): si sirven o qué cambiar.
 10. **Encabezado del plan:** «CONDICIÓN DEL ALUMNO:» o «EL ALUMNO PRESENTA UNA BARRERA… ASOCIADA A:».
 11. **Formato del Informe de psicología** (solo cuando el psicólogo de la USAER determina un diagnóstico), si se quiere generar en EVAU. Mientras, se adjunta como documento. Ya no se piden informe de seguimiento ni detección: la maestra de apoyo solo entrega plan, evaluación psicopedagógica e informe final.
-### Prioridad 2 · Para usar datos reales (hoy NO se debe)
+### Prioridad 2 · Cuidado de los datos reales (EVAU ya se usa con datos reales desde el 25/11/2026)
 12. **Cifrado** de la información (la clave personal ya existe desde la 1.5.0 y el aviso de respaldo también).
 13. Aviso de privacidad de la autoridad responsable y **autorización de la directora** para usar el sistema.
 14. **Juntar la información:** ya se acordó hacerlo con respaldos y «Combinar» (sin servidor). Falta decidir **qué aparatos** (el de cada quien, uno por escuela o uno de la USAER) y **quién junta** los respaldos y cada cuándo.

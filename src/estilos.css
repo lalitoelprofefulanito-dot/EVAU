@@ -10,7 +10,6 @@ header.barra{background:var(--azul);color:#fff;padding:.6rem 1rem;display:flex;a
 header.barra .marca{font-size:1.4rem;font-weight:bold;letter-spacing:.05em}
 header.barra .sub{font-size:.85rem;flex:1;min-width:10rem}
 header.barra button{background:#fff;color:var(--azul);border:2px solid #fff}
-.aviso-ficticio{background:var(--rojo);color:#fff;font-weight:bold;text-align:center;padding:.35rem .6rem;font-size:.9rem}
 nav.menu{display:flex;gap:.3rem;overflow-x:auto;background:var(--gris);padding:.4rem .6rem;border-bottom:2px solid var(--azul);position:sticky;top:0;z-index:5}
 nav.menu a{flex:0 0 auto;text-decoration:none;color:var(--azul);background:#fff;border:2px solid var(--azul);border-radius:.5rem;padding:.45rem .8rem;font-size:1rem}
 nav.menu a.activo{background:var(--azul);color:#fff}
