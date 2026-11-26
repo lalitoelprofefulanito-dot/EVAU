@@ -78,6 +78,7 @@ const AYUDA_ORDENES = [
   ['Plan de <em>nombre</em> · Imprime el plan de <em>nombre</em>', 'Abre el plan; con «imprime», «exporta» o «Word» abre la hoja para imprimir o bajar.'],
   ['Informe de <em>nombre</em>', 'Abre la pantalla para generar su informe.'],
   ['Plan de comunicación de <em>nombre</em> · Informe de comunicación de <em>nombre</em>', 'Abre esos formatos listos para imprimir o bajar a Word.'],
+  ['Plan de psicología de <em>nombre</em> · Informe de psicología de <em>nombre</em>', 'Abre los formatos de psicología listos para imprimir o bajar a Word.'],
   ['Nuevo alumno', 'Abre el alta de un alumno.'],
   ['Descarga el respaldo', 'Descarga el archivo de respaldo de este aparato.'],
   ['Combina un respaldo', 'Lleva a Ajustes para elegir los archivos.'],
@@ -113,6 +114,10 @@ function interpretarOrden(dicho) {
     if (!puedeEditar()) return { msg: 'Con el perfil de dirección no se hacen registros de alumnos.' };
     if (!m[1]) { cerrarOrdenes(); nuevoRegistro({}, true); return { hecho: true }; }
     return conNombre(m[1], id => { cerrarOrdenes(); nuevoRegistro({ alumnoId: id }, true); });
+  }
+  if ((m = t.match(/(plan|informe)(?: final)?(?: de atencion)?(?: de| del area de)? psicologia\s*(.*)$/))) {
+    const boton = m[1] === 'plan' ? '#vpp' : '#vip';
+    return conNombre(m[2], id => { cerrarOrdenes(); irA('#alumno/' + id + '/psicologia', () => clic(boton)); });
   }
   if ((m = t.match(/(plan|informe)(?: final)? de comunicacion\s*(.*)$/))) {
     const boton = m[1] === 'plan' ? '#vpc' : '#vic';

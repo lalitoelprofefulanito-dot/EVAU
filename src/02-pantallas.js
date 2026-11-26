@@ -92,6 +92,12 @@ function cargarEjemplo() {
   cm.informe.recPadres = ['Recomendación de ejemplo para la familia.']; cm.informe.recDocentes = ['Recomendación de ejemplo para el docente.'];
   cm.actualizado = '2026-11-20';
   d.comunicacion = { a5: cm };
+  const ps = psiVacio();   // psicología: contenido de ejemplo, ficticio
+  Object.assign(ps.plan, { modalidad: 'Individual', sesiones: '8', periodo: 'Octubre a junio (ejemplo)', fecha: '2026-10-20' });
+  ps.plan.areas = [Object.assign(areaPsiVacia(), { area: 'Intelectual (ejemplo)', funciones: ['Atención sostenida (ejemplo)'], actividades: ['Juego de memoria con tarjetas (ejemplo).', 'Seguir instrucciones de dos pasos (ejemplo).'], indicadores: ['Mantiene la atención durante 10 minutos (ejemplo).'], campos: ['Lenguajes'], aprendizajes: ['Comprende instrucciones en clase (ejemplo).'], adecuaciones: ['Instrucciones cortas con apoyo visual (ejemplo).'] })];
+  Object.assign(ps.informe, { conceptual: 'Texto de ejemplo del dominio conceptual.', practico: 'Texto de ejemplo del dominio práctico.', social: 'Texto de ejemplo del dominio social.', sugPadres: ['Sugerencia de ejemplo para la familia.'], sugMaestro: ['Sugerencia de ejemplo para el maestro de grupo.'] });
+  ps.actualizado = '2026-10-20';
+  d.psicologia = { a1: ps };
   d.documentos = [{ id: 'd1', alumnoId: 'a1', tipo: 'Informe final', ciclo: '2025-2026', nombre: 'informe_final_2025-2026.pdf (ejemplo sin archivo)', tipoArchivo: '', fecha: '2026-07-08', sinArchivo: true }];
   d.valoraciones = { a1: { 0: { i: 'R', m: 'P', f: '', ev: 'Registros de lectura de octubre y noviembre.' } } };
   DB = d; calcularHuellas();

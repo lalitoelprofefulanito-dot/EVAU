@@ -1,6 +1,6 @@
 'use strict';
 /* EVAU · Expediente Vivo de Atención USAER/UDEEI · núcleo: utilidades, catálogos, almacenamiento y dictado */
-const VERSION = '1.5.0';
+const VERSION = '1.6.0';
 const CLAVE = '0000';
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -88,7 +88,7 @@ function estadoVacio() {
       { id: 'u4', nombre: 'Dir. Dirección Ficticio', rol: 'direccion' }
     ],
     escuelas: [], grupos: [], alumnos: [], registros: [], evidencias: [], documentos: [],
-    valoraciones: {}, planes: {}, comunicacion: {}, informes: [], bitacora: [], borrados: []
+    valoraciones: {}, planes: {}, comunicacion: {}, psicologia: {}, informes: [], bitacora: [], borrados: []
   };
 }
 /* Convierte datos o respaldos de la versión 1.0 al formato del plan real (no se pierde nada) */
@@ -173,9 +173,10 @@ async function borrarArchivos() { for (const k in mem) delete mem[k]; await idbO
    No hace falta tocar cada pantalla: al guardar, EVAU compara cada dato con su «huella» anterior y sella solo lo que cambió.
    Lo que se quita del expediente deja una marca en «borrados», para que al combinar no reaparezca. */
 const COLECCIONES = ['usuarios', 'escuelas', 'grupos', 'alumnos', 'registros', 'evidencias', 'documentos', 'informes'];
-const MAPAS = ['planes', 'valoraciones', 'comunicacion'];
+const MAPAS = ['planes', 'valoraciones', 'comunicacion', 'psicologia'];
 /* Un plan o una ficha de comunicación vacíos (se crean solo con abrir la pestaña) no cuentan como dato */
-const mapaVacio = (c, x) => (c === 'planes' && planVacioSinFecha(x)) || (c === 'comunicacion' && huella(Object.assign({}, x, { actualizado: '' })) === huella(Object.assign(comVacio(), { actualizado: '' })));
+const mapaVacio = (c, x) => (c === 'planes' && planVacioSinFecha(x)) || (c === 'comunicacion' && huella(Object.assign({}, x, { actualizado: '' })) === huella(Object.assign(comVacio(), { actualizado: '' })))
+  || (c === 'psicologia' && huella(Object.assign({}, x, { actualizado: '' })) === huella(Object.assign(psiVacio(), { actualizado: '' })));
 const OBJETOS = ['config', 'usaer'];
 const SELLO_ANTIGUO = '2000-01-01T00:00:00.000Z';   // datos de antes de la 1.3: se sabe que existen, no cuándo cambiaron
 const NOMBRES_COL = { usuarios: ['profesional', 'profesionales'], escuelas: ['escuela', 'escuelas'], grupos: ['grupo', 'grupos'], alumnos: ['alumno', 'alumnos'], registros: ['registro', 'registros'], evidencias: ['evidencia', 'evidencias'], documentos: ['documento', 'documentos'], informes: ['informe', 'informes'], planes: ['plan de intervención', 'planes de intervención'], valoraciones: ['valoración', 'valoraciones'], config: ['dato del ciclo', 'datos del ciclo'], usaer: ['dato del servicio', 'datos del servicio'] };

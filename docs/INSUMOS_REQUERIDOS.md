@@ -1,4 +1,4 @@
-# Formatos e insumos para seguir actualizando EVAU (v1.5.0 · actualizada el 25/11/2026)
+# Formatos e insumos para seguir actualizando EVAU (v1.6.0 · actualizada el 25/11/2026)
 
 ## A. Ya entregados y ya usados en la app
 | Insumo | Fecha | Qué resolvió en EVAU |
@@ -9,27 +9,28 @@
 | Documento «Dictado por voz en aplicaciones web» | 23/11/2026 | Reglas del dictado |
 | **Plantilla interna de inicio 2026-2027** | 23/11/2026 | Datos de la USAER (zona 004, CCT, turno matutino, domicilio, directora), las 7 personas del equipo con su función y sus escuelas, horario del personal (8:00 a 12:30) y **catálogo oficial de condiciones** (estructura del 911 USAER-1, con «Otras condiciones: Dificultad severa de conducta / comunicación / aprendizaje») |
 | **Ámbito de inicio 2026-2027** | 23/11/2026 | Las 7 escuelas con CCT, zona, domicilio y director(a); 44 grupos con su docente |
+| Archivos del proyecto: dos Planes de atención / intervención de psicología, un Informe final de psicología, un segundo Informe final de comunicación y la Plantilla de medio ciclo | 25/11/2026 | Pestaña «Psicología» (1.6.0). Los planes muestran que el compañero con licenciatura en psicología trabaja como psicólogo en Juan Escutia (12DPR5837P); los audios lo ubican en Narciso Mendoza |
 | Conversación con la maestra de apoyo (audios y mensajes) | 25/11/2026 | Modelo de trabajo sin servidor (cada quien en su aparato o uno por escuela; se juntan respaldos), pedir por voz, clave personal, CURP para unir alumnos, aviso de respaldo y combinar varios (1.5.0) |
 | Plan de intervención individual de comunicación e Informe final de comunicación | 24/11/2026 | Pestaña «Comunicación» (1.4.0), encabezado institucional y logotipos (1.4.1) |
 
 ## B. Pendientes que se dieron por resueltos con lo entregado (ya no se piden)
-1. **Reparto del personal y diferencias con los audios.** Se toma la **Plantilla interna** como fuente oficial: una psicóloga para las 7 escuelas, cuatro maestros de apoyo (el compañero con licenciatura en psicología cuenta como maestro de apoyo) y la directora sin grupo. Si en la práctica alguien trabaja distinto, se corrige en Ajustes → Profesionales.
+1. **Reparto del personal.** La Plantilla registra a una psicóloga para las 7 escuelas, pero los planes de psicología y los audios muestran que, en la práctica, el compañero con licenciatura en psicología atiende psicología en Juan Escutia (12DPR5837P) y Narciso Mendoza (12DPR0270V), además de su función de maestro de apoyo. En EVAU aparece dos veces (una con cada función) y la psicóloga queda en las otras cinco escuelas. Se corrige en Ajustes → Profesionales si cambia.
 2. **Turno de las escuelas.** Matutino en las 7: la USAER es de turno matutino y su personal trabaja de 8:00 a 12:30 (Plantilla).
 3. **Domicilio y código postal de la USAER.** Se usa el de la Plantilla (C.P. 39753).
 4. **Categorías del 911.** La Plantilla trae el catálogo oficial: EVAU 1.4.1 ya usa «Dificultad severa de…» y las cinco aptitudes sobresalientes (intelectual, creativa, socioafectiva, artística y psicomotriz). Los datos anteriores se convierten solos.
 5. **Logotipos.** Vienen en los formatos de comunicación; están en el respaldo del equipo y se pueden cambiar en Ajustes.
 6. **Cuándo se entregan los documentos de comunicación.** Según los formatos: plan por periodo (el ejemplo cubre oct.–ene. y se firma a fin de enero) e informe final en julio.
 
-## C. Ya entregado, pero no está en este chat
-7. **Plan de atención de psicología** (23/11/2026, en otro chat). Volver a adjuntarlo en el chat donde se integre.
+## C. Ya entregado y ya integrado (antes pendiente)
+7. **Plan de atención de psicología e Informe final de psicología:** integrados en la 1.6.0.
 
 ## D. Pendientes reales (se piden con el formulario de Google `herramientas/insumos_formulario.gs`)
 ### Prioridad 1 · Para que la maestra la use de verdad
 8. **Prueba del dictado y de «Combinar»** en su celular y en el de una compañera: tipo de celular y navegador; si el dictado separa bien la actividad de la observación.
 9. **Marcas** (logro, dificultad, apoyo brindado) y **niveles de apoyo** (ayuda total, modelado, indicación verbal, recordatorio visual, independiente): si sirven o qué cambiar.
 10. **Encabezado del plan:** «CONDICIÓN DEL ALUMNO:» o «EL ALUMNO PRESENTA UNA BARRERA… ASOCIADA A:».
-11. **Formatos en blanco:** informe final de alumnos sin diagnóstico, informe de seguimiento (si es distinto del plan), informe psicológico, informe psicopedagógico e informe final del maestro de apoyo.
-12. **Cuándo se entrega** el informe psicológico, el psicopedagógico y el informe del maestro de apoyo.
+11. **Formatos en blanco:** informe final de alumnos sin diagnóstico, informe de seguimiento (si es distinto del plan), informe psicopedagógico e informe final del maestro de apoyo.
+12. **Cuándo se entrega** el informe psicopedagógico y el informe del maestro de apoyo (los de comunicación y psicología se fechan en julio, según sus formatos).
 ### Prioridad 2 · Formatos de la autoridad
 13. Formato de **evaluación psicopedagógica y de detección** que usa la USAER.
 ### Prioridad 3 · Para usar datos reales (hoy NO se debe)

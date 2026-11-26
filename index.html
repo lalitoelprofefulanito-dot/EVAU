@@ -175,7 +175,7 @@ label.boton{display:inline-block}
 <script>
 'use strict';
 /* EVAU · Expediente Vivo de Atención USAER/UDEEI · núcleo: utilidades, catálogos, almacenamiento y dictado */
-const VERSION = '1.5.0';
+const VERSION = '1.6.0';
 const CLAVE = '0000';
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -263,7 +263,7 @@ function estadoVacio() {
       { id: 'u4', nombre: 'Dir. Dirección Ficticio', rol: 'direccion' }
     ],
     escuelas: [], grupos: [], alumnos: [], registros: [], evidencias: [], documentos: [],
-    valoraciones: {}, planes: {}, comunicacion: {}, informes: [], bitacora: [], borrados: []
+    valoraciones: {}, planes: {}, comunicacion: {}, psicologia: {}, informes: [], bitacora: [], borrados: []
   };
 }
 /* Convierte datos o respaldos de la versión 1.0 al formato del plan real (no se pierde nada) */
@@ -348,9 +348,10 @@ async function borrarArchivos() { for (const k in mem) delete mem[k]; await idbO
    No hace falta tocar cada pantalla: al guardar, EVAU compara cada dato con su «huella» anterior y sella solo lo que cambió.
    Lo que se quita del expediente deja una marca en «borrados», para que al combinar no reaparezca. */
 const COLECCIONES = ['usuarios', 'escuelas', 'grupos', 'alumnos', 'registros', 'evidencias', 'documentos', 'informes'];
-const MAPAS = ['planes', 'valoraciones', 'comunicacion'];
+const MAPAS = ['planes', 'valoraciones', 'comunicacion', 'psicologia'];
 /* Un plan o una ficha de comunicación vacíos (se crean solo con abrir la pestaña) no cuentan como dato */
-const mapaVacio = (c, x) => (c === 'planes' && planVacioSinFecha(x)) || (c === 'comunicacion' && huella(Object.assign({}, x, { actualizado: '' })) === huella(Object.assign(comVacio(), { actualizado: '' })));
+const mapaVacio = (c, x) => (c === 'planes' && planVacioSinFecha(x)) || (c === 'comunicacion' && huella(Object.assign({}, x, { actualizado: '' })) === huella(Object.assign(comVacio(), { actualizado: '' })))
+  || (c === 'psicologia' && huella(Object.assign({}, x, { actualizado: '' })) === huella(Object.assign(psiVacio(), { actualizado: '' })));
 const OBJETOS = ['config', 'usaer'];
 const SELLO_ANTIGUO = '2000-01-01T00:00:00.000Z';   // datos de antes de la 1.3: se sabe que existen, no cuándo cambiaron
 const NOMBRES_COL = { usuarios: ['profesional', 'profesionales'], escuelas: ['escuela', 'escuelas'], grupos: ['grupo', 'grupos'], alumnos: ['alumno', 'alumnos'], registros: ['registro', 'registros'], evidencias: ['evidencia', 'evidencias'], documentos: ['documento', 'documentos'], informes: ['informe', 'informes'], planes: ['plan de intervención', 'planes de intervención'], valoraciones: ['valoración', 'valoraciones'], config: ['dato del ciclo', 'datos del ciclo'], usaer: ['dato del servicio', 'datos del servicio'] };
@@ -826,6 +827,12 @@ function cargarEjemplo() {
   cm.informe.recPadres = ['Recomendación de ejemplo para la familia.']; cm.informe.recDocentes = ['Recomendación de ejemplo para el docente.'];
   cm.actualizado = '2026-11-20';
   d.comunicacion = { a5: cm };
+  const ps = psiVacio();   // psicología: contenido de ejemplo, ficticio
+  Object.assign(ps.plan, { modalidad: 'Individual', sesiones: '8', periodo: 'Octubre a junio (ejemplo)', fecha: '2026-10-20' });
+  ps.plan.areas = [Object.assign(areaPsiVacia(), { area: 'Intelectual (ejemplo)', funciones: ['Atención sostenida (ejemplo)'], actividades: ['Juego de memoria con tarjetas (ejemplo).', 'Seguir instrucciones de dos pasos (ejemplo).'], indicadores: ['Mantiene la atención durante 10 minutos (ejemplo).'], campos: ['Lenguajes'], aprendizajes: ['Comprende instrucciones en clase (ejemplo).'], adecuaciones: ['Instrucciones cortas con apoyo visual (ejemplo).'] })];
+  Object.assign(ps.informe, { conceptual: 'Texto de ejemplo del dominio conceptual.', practico: 'Texto de ejemplo del dominio práctico.', social: 'Texto de ejemplo del dominio social.', sugPadres: ['Sugerencia de ejemplo para la familia.'], sugMaestro: ['Sugerencia de ejemplo para el maestro de grupo.'] });
+  ps.actualizado = '2026-10-20';
+  d.psicologia = { a1: ps };
   d.documentos = [{ id: 'd1', alumnoId: 'a1', tipo: 'Informe final', ciclo: '2025-2026', nombre: 'informe_final_2025-2026.pdf (ejemplo sin archivo)', tipoArchivo: '', fecha: '2026-07-08', sinArchivo: true }];
   d.valoraciones = { a1: { 0: { i: 'R', m: 'P', f: '', ev: 'Registros de lectura de octubre y noviembre.' } } };
   DB = d; calcularHuellas();
@@ -1203,7 +1210,7 @@ function vAjustes(v) {
 }
 
 /* EVAU · expediente del alumno, plan de intervención (formato real), análisis de registros e informes */
-const TABS = [['historial', 'Registro cronológico'], ['plan', 'Plan de intervención'], ['informes', 'Informes'], ['comunicacion', 'Comunicación'], ['datos', 'Datos y documentos'], ['evidencias', 'Evidencias'], ['valoracion', 'Valoración']];
+const TABS = [['historial', 'Registro cronológico'], ['plan', 'Plan de intervención'], ['informes', 'Informes'], ['psicologia', 'Psicología'], ['comunicacion', 'Comunicación'], ['datos', 'Datos y documentos'], ['evidencias', 'Evidencias'], ['valoracion', 'Valoración']];
 
 function cajaDocumentos(a) {
   const c = DB.config.ciclo, prev = (Number(c.slice(0, 4)) - 1) + '-' + c.slice(0, 4);
@@ -1217,7 +1224,7 @@ function cajaDocumentos(a) {
     const finalCiclo = doc('Informe final', c) || DB.informes.some(i => i.alumnoId === a.id && i.tipo === 'Final del ciclo');
     return `<div class="docs"><strong>Documentos · sin diagnóstico</strong>${it(cons, 'Consentimiento informado', 'datos')}${it(finalCiclo, 'Informe final ' + esc(c), 'informes')}<span class="nota">Solo lleva el informe final del ciclo: sin plan de intervención, propuesta ni evaluación psicopedagógica.</span></div>`;
   }
-  return `<div class="docs"><strong>Documentos</strong>${it(cons, 'Consentimiento informado', 'datos')}${it(plan, 'Plan de intervención ' + esc(c), 'plan')}${it(doc('Informe de evaluación psicopedagógica'), 'Informe psicopedagógico', 'datos')}${it(doc('Informe psicológico', c), 'Informe psicológico ' + esc(c), 'datos')}${it(doc('Informe de comunicación', c) || DB.informes.some(i => i.alumnoId === a.id && i.tipo === 'Final de comunicación' && i.ciclo === c), 'Informe de comunicación ' + esc(c), 'datos')}${it(finalAnt, 'Informe final ' + esc(prev), 'datos')}</div>`;
+  return `<div class="docs"><strong>Documentos</strong>${it(cons, 'Consentimiento informado', 'datos')}${it(plan, 'Plan de intervención ' + esc(c), 'plan')}${it(doc('Informe de evaluación psicopedagógica'), 'Informe psicopedagógico', 'datos')}${it(doc('Informe psicológico', c) || DB.informes.some(i => i.alumnoId === a.id && i.tipo === 'Final de psicología' && i.ciclo === c), 'Informe psicológico ' + esc(c), 'datos')}${it(doc('Informe de comunicación', c) || DB.informes.some(i => i.alumnoId === a.id && i.tipo === 'Final de comunicación' && i.ciclo === c), 'Informe de comunicación ' + esc(c), 'datos')}${it(finalAnt, 'Informe final ' + esc(prev), 'datos')}</div>`;
 }
 function vAlumno(v, id, tab) {
   const a = porId('alumnos', id); if (!a) return vInicio(v);
@@ -1228,7 +1235,7 @@ function vAlumno(v, id, tab) {
   ${cajaDocumentos(a)}
   <div class="pestanas">${TABS.filter(t => determinado(a) || t[0] !== 'valoracion').map(t => `<a href="#alumno/${id}/${t[0]}" class="${t[0] === tab ? 'activo' : ''}">${t[1]}</a>`).join('')}</div><div id="tab"></div>`;
   if (tab === 'valoracion' && !determinado(a)) tab = 'historial';   // sin diagnóstico no lleva valoración
-  ({ datos: tDatos, historial: tHistorial, evidencias: tEvidencias, valoracion: tValoracion, plan: tPlan, informes: tInformes, comunicacion: tComunicacion }[tab] || tHistorial)($('#tab'), a);
+  ({ datos: tDatos, historial: tHistorial, evidencias: tEvidencias, valoracion: tValoracion, plan: tPlan, informes: tInformes, psicologia: tPsicologia, comunicacion: tComunicacion }[tab] || tHistorial)($('#tab'), a);
 }
 
 /* ---------- Datos y documentos ---------- */
@@ -1720,6 +1727,7 @@ const AYUDA_ORDENES = [
   ['Plan de <em>nombre</em> · Imprime el plan de <em>nombre</em>', 'Abre el plan; con «imprime», «exporta» o «Word» abre la hoja para imprimir o bajar.'],
   ['Informe de <em>nombre</em>', 'Abre la pantalla para generar su informe.'],
   ['Plan de comunicación de <em>nombre</em> · Informe de comunicación de <em>nombre</em>', 'Abre esos formatos listos para imprimir o bajar a Word.'],
+  ['Plan de psicología de <em>nombre</em> · Informe de psicología de <em>nombre</em>', 'Abre los formatos de psicología listos para imprimir o bajar a Word.'],
   ['Nuevo alumno', 'Abre el alta de un alumno.'],
   ['Descarga el respaldo', 'Descarga el archivo de respaldo de este aparato.'],
   ['Combina un respaldo', 'Lleva a Ajustes para elegir los archivos.'],
@@ -1755,6 +1763,10 @@ function interpretarOrden(dicho) {
     if (!puedeEditar()) return { msg: 'Con el perfil de dirección no se hacen registros de alumnos.' };
     if (!m[1]) { cerrarOrdenes(); nuevoRegistro({}, true); return { hecho: true }; }
     return conNombre(m[1], id => { cerrarOrdenes(); nuevoRegistro({ alumnoId: id }, true); });
+  }
+  if ((m = t.match(/(plan|informe)(?: final)?(?: de atencion)?(?: de| del area de)? psicologia\s*(.*)$/))) {
+    const boton = m[1] === 'plan' ? '#vpp' : '#vip';
+    return conNombre(m[2], id => { cerrarOrdenes(); irA('#alumno/' + id + '/psicologia', () => clic(boton)); });
   }
   if ((m = t.match(/(plan|informe)(?: final)? de comunicacion\s*(.*)$/))) {
     const boton = m[1] === 'plan' ? '#vpc' : '#vic';
@@ -1803,6 +1815,115 @@ function abrirOrdenes(escucharYa) {
   $('#ord', v).onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); hacer($('#ord', v).value); } };
   botonMicrofono($('#ordvoz', v), { caja: $('#ord', v), alEstado: est, escribir: frases => { const dicho = frases.join(' ').trim(); if (dicho) { $('#ord', v).value = dicho; detenerVoz(); hacer(dicho); } } });
   if (escucharYa) $('#ordvoz', v).click(); else $('#ord', v).focus();
+}
+
+/* EVAU · Área de psicología (1.6.0)
+   Plan de atención / intervención del área de psicología e Informe final de psicología.
+   Estructura tomada de los formatos de los psicólogos de la USAER (archivos del proyecto, recibidos el 25/11/2026).
+   De esos formatos solo se tomó la estructura: ningún dato de alumnos. */
+CAT.modalidadesPsi = ['Individual', 'Subgrupal', 'Grupal'];
+function psiVacio() {
+  return {
+    plan: { modalidad: 'Individual', sesiones: '', periodo: '', diagnostico: '', fecha: '', areas: [] },
+    informe: { fecha: '', conceptual: '', practico: '', social: '', sugPadres: [], sugMaestro: [] },
+    actualizado: ''
+  };
+}
+const areaPsiVacia = () => ({ area: '', funciones: [], actividades: [], indicadores: [], campos: [], aprendizajes: [], adecuaciones: [] });
+function psiDe(id) { DB.psicologia = DB.psicologia || {}; if (!DB.psicologia[id]) DB.psicologia[id] = psiVacio(); return DB.psicologia[id]; }
+const psicologoDe = a => DB.usuarios.find(u => u.rol === 'psicologia' && atiende(u, a.escuelaId)) || { nombre: '' };
+const firmasPsi = (a, izq) => `<table class="firmas"><tr><td>${izq}<div class="linea"></div><strong>${MAYUS(psicologoDe(a).nombre)}</strong><br>PSICOLOGÍA</td><td>Vo. Bo.<div class="linea"></div><strong>${MAYUS(DB.usaer.directora)}</strong><br>DIRECTORA DE LA USAER</td></tr></table>`;
+
+function htmlPlanPsi(a, c) {
+  const p = c.plan, g = porId('grupos', a.grupoId) || {}, e = porId('escuelas', a.escuelaId) || {};
+  const marca = m => (p.modalidad === m ? '☑' : '☐') + ' ' + m.toUpperCase();
+  const areas = p.areas.length ? p.areas : [areaPsiVacia()];
+  return `${encabezadoInst()}
+  <h1>PLAN DE ATENCIÓN / INTERVENCIÓN ÁREA DE PSICOLOGÍA</h1>
+  <table class="datos-com"><tr><td colspan="3"><strong>SERVICIO DE EDUCACIÓN ESPECIAL:</strong> ${MAYUS(DB.usaer.unidad)}</td><td colspan="2"><strong>PSICÓLOGO(A):</strong> ${MAYUS(psicologoDe(a).nombre)}</td></tr>
+  <tr><td colspan="2"><strong>ALUMNO(S):</strong> ${MAYUS(a.nombre)}</td><td><strong>EDAD:</strong> ${esc(edad(a.nacimiento))}</td><td><strong>GRADO:</strong> ${esc(g.grado || '')}</td><td><strong>GRUPO:</strong> ${esc(g.grupo || '')}</td></tr>
+  <tr><td colspan="3"><strong>ESCUELA:</strong> ${MAYUS(e.nombre)}</td><td colspan="2"><strong>DOCENTE:</strong> ${MAYUS(g.docente)}</td></tr>
+  <tr><td colspan="5"><strong>DX:</strong> ${MAYUS(p.diagnostico || a.diagnostico || a.condicion)}</td></tr>
+  <tr><td colspan="3"><strong>MODALIDAD DE ATENCIÓN:</strong> ${CAT.modalidadesPsi.map(marca).join(' &nbsp; ')}</td><td colspan="2"><strong>TOTAL DE SESIONES:</strong> ${esc(p.sesiones)}</td></tr>
+  <tr><td colspan="3"><strong>PERIODO (MESES Y DÍAS):</strong> ${MAYUS(p.periodo)}</td><td colspan="2"><strong>CICLO ESCOLAR:</strong> ${esc(DB.config.ciclo)}</td></tr></table>
+  ${areas.map((x, i) => `<table><thead><tr><th colspan="3">ÁREA DE DESARROLLO ${i + 1}: ${MAYUS(x.area)}</th></tr>
+  <tr><th style="width:28%">FUNCIONES / CAPACIDADES A DESARROLLAR</th><th>SECUENCIA DE ACTIVIDADES (EN EL ORDEN DE APLICACIÓN)</th><th style="width:30%">INDICADORES DE EVALUACIÓN (LO QUE SE ESPERA QUE LOGRE EL ALUMNO DURANTE ESTE PERIODO)</th></tr></thead>
+  <tr><td>${ul(x.funciones) || '&nbsp;'}</td><td>${ul(x.actividades) || '&nbsp;'}</td><td>${ul(x.indicadores) || '&nbsp;'}</td></tr>
+  <tr><th>ALGUNOS CAMPOS FORMATIVOS CON LOS QUE SE RELACIONAN ESTAS CAPACIDADES</th><th>EJEMPLOS DE PROBABLES APRENDIZAJES FACILITADOS</th><th>ADECUACIONES INDIVIDUALES</th></tr>
+  <tr><td>${ul(x.campos) || '&nbsp;'}</td><td>${ul(x.aprendizajes) || '&nbsp;'}</td><td>${ul(x.adecuaciones) || '&nbsp;'}</td></tr></table>`).join('')}
+  ${lugarFecha(p.fecha || hoy())}${firmasPsi(a, 'REALIZÓ')}`;
+}
+function htmlInfPsi(a, c) {
+  const x = c.informe, g = porId('grupos', a.grupoId) || {}, e = porId('escuelas', a.escuelaId) || {}, f = x.fecha || hoy();
+  const dom = (t, k) => `<h2>${t}</h2>${parrafos(x[k]) || '<p><em>Sin redactar.</em></p>'}`;
+  return `${encabezadoInst()}
+  <h1>INFORME FINAL DE PSICOLOGÍA</h1>
+  <h2>DATOS PERSONALES</h2>
+  <table class="datos-com"><tr><td colspan="2"><strong>ESCUELA:</strong> ${MAYUS(e.nombre)}</td></tr>
+  <tr><td colspan="2"><strong>ALUMNO:</strong> ${MAYUS(a.nombre)}</td></tr>
+  <tr><td><strong>EDAD:</strong> ${esc(edad(a.nacimiento))}</td><td><strong>FECHA DE NACIMIENTO:</strong> ${esc(flarga(a.nacimiento))}</td></tr>
+  <tr><td><strong>GRADO:</strong> ${esc(g.grado || '')}</td><td><strong>GRUPO:</strong> ${esc(g.grupo || '')}</td></tr>
+  <tr><td colspan="2"><strong>DOCENTE:</strong> ${MAYUS(g.docente)}</td></tr>
+  <tr><td colspan="2"><strong>FECHA DE ELABORACIÓN:</strong> ${esc(flarga(f))}</td></tr></table>
+  ${dom('DOMINIO CONCEPTUAL', 'conceptual')}${dom('DOMINIO PRÁCTICO', 'practico')}${dom('DOMINIO SOCIAL', 'social')}
+  <h2>SUGERENCIAS</h2><p><strong>PADRES DE FAMILIA</strong></p>${ul(x.sugPadres) || '<p><em>—</em></p>'}<p><strong>MAESTRO DE GRUPO</strong></p>${ul(x.sugMaestro) || '<p><em>—</em></p>'}
+  ${firmasPsi(a, 'ELABORÓ')}`;
+}
+function apoyoRegistrosPsi(a) {
+  const cic = ciclo(), rs = vigentes().filter(r => r.alumnoId === a.id && r.fecha >= cic.ini && r.fecha <= cic.fin && (porId('usuarios', r.usuarioId) || {}).rol === 'psicologia').sort((x, y) => y.fecha.localeCompare(x.fecha));
+  if (!rs.length) return '<p class="caja nota">Todavía no hay registros de psicología en este ciclo. Cuando los haya, aparecerán aquí como apoyo para redactar.</p>';
+  return `<details class="caja nota"><summary><strong>Ver los ${rs.length} registros de psicología del ciclo</strong> (apoyo para redactar)</summary><ul>${rs.slice(0, 40).map(r => `<li><strong>${esc(fcorta(r.fecha))}</strong> · ${esc(r.actividad)}${r.observacion ? ' — ' + esc(r.observacion) : ''}</li>`).join('')}</ul></details>`;
+}
+function editarPsi(a, c, cual, clave) {
+  const listo = m => { c.actualizado = hoy(); guardar('Psicología: ' + m); pintar(); };
+  const p = c.plan, x = c.informe;
+  if (cual === 'plan' && clave === 'datos') return formulario('Datos del plan de psicología', [
+    { k: 'modalidad', label: 'Modalidad de atención', tipo: 'select', req: 1, opciones: CAT.modalidadesPsi },
+    { k: 'sesiones', label: 'Total de sesiones' }, { k: 'periodo', label: 'Periodo (meses y días)', ayuda: 'Ejemplo: octubre a junio' },
+    { k: 'fecha', label: 'Fecha del plan', tipo: 'date' },
+    { k: 'diagnostico', label: 'Diagnóstico (DX)', tipo: 'textarea', alto: 3, ayuda: 'Si lo deja vacío se usa el diagnóstico de los datos del alumno.' }], p, o => { Object.assign(p, o); listo('datos del plan'); });
+  if (cual === 'area') {
+    const i = Number(clave), nueva = i < 0, ar = nueva ? areaPsiVacia() : p.areas[i];
+    return formulario(nueva ? 'Agregar área de desarrollo' : 'Área de desarrollo ' + (i + 1), [
+      { k: 'area', label: 'Área de desarrollo', req: 1, ayuda: 'Ejemplos de los formatos: Intelectual, Cognitiva.' },
+      { k: 'funciones', label: 'Funciones o capacidades a desarrollar', tipo: 'lista', alto: 4 },
+      { k: 'actividades', label: 'Secuencia de actividades (en el orden de aplicación)', tipo: 'lista', alto: 7 },
+      { k: 'indicadores', label: 'Indicadores de evaluación (lo que se espera que logre)', tipo: 'lista', alto: 5 },
+      { k: 'campos', label: 'Campos formativos con los que se relacionan', tipo: 'lista', alto: 3 },
+      { k: 'aprendizajes', label: 'Ejemplos de probables aprendizajes facilitados', tipo: 'lista', alto: 5 },
+      { k: 'adecuaciones', label: 'Adecuaciones individuales (si son necesarias)', tipo: 'lista', alto: 4 }], ar, o => {
+      Object.assign(ar, o); if (nueva) p.areas.push(ar); listo(nueva ? 'área agregada' : 'área ' + (i + 1));
+    }, apoyoRegistrosPsi(a));
+  }
+  if (cual === 'informe' && clave === 'dominios') return formulario('Informe final de psicología', [
+    { k: 'fecha', label: 'Fecha de elaboración', tipo: 'date' },
+    { k: 'conceptual', label: 'Dominio conceptual', tipo: 'textarea', alto: 7 },
+    { k: 'practico', label: 'Dominio práctico', tipo: 'textarea', alto: 7 },
+    { k: 'social', label: 'Dominio social', tipo: 'textarea', alto: 7 }], x, o => { Object.assign(x, o); listo('dominios'); }, apoyoRegistrosPsi(a));
+  if (cual === 'informe' && clave === 'sug') return formulario('Sugerencias', [
+    { k: 'sugPadres', label: 'Para padres de familia (una por renglón)', tipo: 'lista', alto: 6 },
+    { k: 'sugMaestro', label: 'Para el maestro de grupo (una por renglón)', tipo: 'lista', alto: 6 }], x, o => { x.sugPadres = o.sugPadres; x.sugMaestro = o.sugMaestro; listo('sugerencias'); });
+}
+function tPsicologia(t, a) {
+  const c = psiDe(a.id), edit = puedeEditar(), ps = psicologoDe(a), p = c.plan, x = c.informe;
+  const caja = (tit, dato, html) => `<div class="caja seccion"><div class="fila"><h3>${esc(tit)}</h3><span class="sep"></span>${edit ? `<button class="sec chico" data-psi="${dato}">Editar</button>` : ''}</div>${html}</div>`;
+  t.innerHTML = `<p>Lo llena el <strong>área de psicología</strong>${ps.nombre ? ` (${esc(ps.nombre)})` : ''}. Sigue los formatos de psicología de la USAER. Todos los cuadros se pueden dictar con 🎙.${c.actualizado ? ` Última actualización: ${esc(flarga(c.actualizado))}.` : ''}</p>
+  <div class="fila"><h2>Plan de atención / intervención · psicología</h2><span class="sep"></span><button id="vpp">🖨 Ver, imprimir o Word</button></div>
+  ${caja('Datos del plan', 'plan|datos', `<p><strong>Modalidad:</strong> ${esc(p.modalidad || '—')} · <strong>Sesiones:</strong> ${esc(p.sesiones || '—')} · <strong>Periodo:</strong> ${esc(p.periodo || '—')}</p><p><strong>DX:</strong> ${esc(p.diagnostico || a.diagnostico || a.condicion || '—')}</p>`)}
+  ${p.areas.map((ar, i) => `<div class="caja seccion"><div class="fila"><h3>Área de desarrollo ${i + 1}: ${esc(ar.area)}</h3><span class="sep"></span>${edit ? `<button class="sec chico" data-psi="area|${i}">Editar</button><button class="sec chico" data-qarea="${i}">Quitar</button>` : ''}</div><p><strong>Funciones:</strong> ${esc(ar.funciones.join('; ') || '—')}</p><p><strong>Actividades:</strong> ${ar.actividades.length} · <strong>Indicadores:</strong> ${ar.indicadores.length}</p></div>`).join('') || '<p class="caja"><em>Todavía no hay áreas de desarrollo.</em></p>'}
+  ${edit ? '<button class="sec" data-psi="area|-1">＋ Agregar área de desarrollo</button>' : ''}
+  <div class="fila"><h2>Informe final de psicología</h2><span class="sep"></span><button id="vip">🖨 Ver, imprimir o Word</button></div>
+  ${caja('Dominios conceptual, práctico y social', 'informe|dominios', `<p><strong>Fecha:</strong> ${esc(flarga(x.fecha) || '—')}</p>${['conceptual', 'practico', 'social'].map(k => `<p><strong>${{ conceptual: 'Conceptual', practico: 'Práctico', social: 'Social' }[k]}:</strong> ${esc((x[k] || '—').slice(0, 160))}${(x[k] || '').length > 160 ? '…' : ''}</p>`).join('')}`)}
+  ${caja('Sugerencias', 'informe|sug', `<p><strong>Padres de familia</strong></p>${ul(x.sugPadres) || '<p>—</p>'}<p><strong>Maestro de grupo</strong></p>${ul(x.sugMaestro) || '<p>—</p>'}`)}`;
+  $('#vpp', t).onclick = () => visorDoc('Plan de psicología · ' + a.nombre, htmlPlanPsi(a, c), 'Plan_psicologia_' + a.nombre + '_' + DB.config.ciclo, null, 'plan');
+  $('#vip', t).onclick = () => {
+    const prev = DB.informes.find(i => i.alumnoId === a.id && i.tipo === 'Final de psicología' && i.ciclo === DB.config.ciclo);
+    const inf = prev ? Object.assign({}, prev, { html: htmlInfPsi(a, c) }) : { id: uid(), alumnoId: a.id, tipo: 'Final de psicología', ciclo: DB.config.ciclo, desde: ciclo().ini, hasta: x.fecha || hoy(), fecha: hoy(), usuarioId: USUARIO.id, html: htmlInfPsi(a, c) };
+    visorDoc('Informe final de psicología · ' + a.nombre, inf.html, 'Informe_final_psicologia_' + a.nombre, html => { inf.html = html; inf.fecha = hoy(); if (prev) Object.assign(prev, inf); else DB.informes.push(inf); guardar('Informe guardado: Final de psicología'); aviso('Informe guardado en el expediente.'); pintar(); }, 'plan');
+  };
+  if (!edit) return;
+  t.querySelectorAll('[data-psi]').forEach(b => b.onclick = () => { const [cual, k] = b.dataset.psi.split('|'); editarPsi(a, c, cual, k); });
+  t.querySelectorAll('[data-qarea]').forEach(b => b.onclick = () => confirmar('Se quitará el área de desarrollo ' + (Number(b.dataset.qarea) + 1) + ' del plan.', () => { p.areas.splice(Number(b.dataset.qarea), 1); c.actualizado = hoy(); guardar('Psicología: área quitada'); pintar(); }));
 }
 
 </script>
