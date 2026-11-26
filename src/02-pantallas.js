@@ -337,14 +337,72 @@ function nuevoRegistro(pre, dictarYa) {
 }
 
 /* ---------- Visor de documentos (informes, plan, bitácora) ---------- */
-const ESTILO_WORD = 'body{font-family:Arial;font-size:12pt;text-align:justify}h1{font-size:15pt;text-align:center}h2{font-size:12.5pt;border-bottom:1.5pt solid #000}table{border-collapse:collapse;width:100%}th,td{border:1pt solid #000;padding:4pt;font-size:11pt;text-align:left;vertical-align:top}th{background:#1f2937;color:#fff}.firmas td,.marco>thead>tr>td,.marco>tbody>tr>td{border:none}.portada{text-align:center}';
+const ESTILO_WORD = 'body{font-family:Arial;font-size:12pt;line-height:1.3}p{text-align:justify;margin:0 0 6pt}h1{font-size:14pt;text-align:center;margin:8pt 0}h2{font-size:12pt;text-align:center;text-decoration:underline;margin:10pt 0 4pt}table{border-collapse:collapse;width:100%}th,td{border:1pt solid #000;padding:3pt 5pt;font-size:11pt;text-align:left;vertical-align:top}th{background:#d9d9d9;color:#000}ul{margin:0 0 4pt 18pt}.horizontal th,.horizontal td{font-size:10pt}.firmas td,.marco>thead>tr>td,.marco>tbody>tr>td,.enc-oficial td,.tabla-fotos td{border:none}.enc-oficial td{text-align:center;vertical-align:middle;font-size:10pt}.enc-oficial p{text-align:center;margin:0}.firmas td{text-align:center;padding-top:30pt}.portada{text-align:center}.tabla-fotos td{text-align:center;font-size:10pt}';
+/* Imagen reducida para no hacer pesado el expediente (máx. 1400 px, JPEG) */
+function reducirImagen(file, max) {
+  return new Promise((ok, mal) => {
+    const url = URL.createObjectURL(file), im = new Image();
+    im.onload = () => { const k = Math.min(1, (max || 1400) / Math.max(im.width, im.height)), cv = document.createElement('canvas'); cv.width = Math.round(im.width * k); cv.height = Math.round(im.height * k); cv.getContext('2d').drawImage(im, 0, 0, cv.width, cv.height); URL.revokeObjectURL(url); ok({ src: cv.toDataURL('image/jpeg', 0.82), w: cv.width, h: cv.height }); };
+    im.onerror = () => { URL.revokeObjectURL(url); mal(new Error('imagen')); };
+    im.src = url;
+  });
+}
+/* Fotografías de evidencia: tabla de 2 por renglón (sirve igual al imprimir y en Word) */
+function pintarFotos(hoja, fotos) {
+  let caja = hoja.querySelector('.anexo-fotos');
+  if (!fotos.length) { if (caja) caja.remove(); return; }
+  if (!caja) { caja = document.createElement('div'); caja.className = 'anexo-fotos'; hoja.appendChild(caja); }
+  let filas = '';
+  for (let i = 0; i < fotos.length; i += 2) filas += '<tr>' + [fotos[i], fotos[i + 1]].map((f, k) => f ? `<td><img class="foto-evid" src="${f.src}" alt="Evidencia ${i + k + 1}"><div class="pie-foto" contenteditable="true">${esc(f.pie)}</div><button type="button" class="sec chico no-imprime quitar-foto" data-i="${i + k}">Quitar foto</button></td>` : '<td></td>').join('') + '</tr>';
+  caja.innerHTML = `<h2 class="salto-antes">ANEXO · EVIDENCIAS FOTOGRÁFICAS</h2><table class="tabla-fotos">${filas}</table>`;
+}
+function fotosDe(hoja) { return [...hoja.querySelectorAll('.anexo-fotos td')].filter(td => td.querySelector('img')).map(td => ({ src: td.querySelector('img').src, pie: (td.querySelector('.pie-foto') || {}).textContent || '' })); }
+/* HTML limpio del documento: sin botones ni zonas editables; sin escudos si así se eligió */
+function htmlLimpio(hoja, paraWord) {
+  const c = hoja.cloneNode(true);
+  c.querySelectorAll('.no-imprime').forEach(x => x.remove());
+  if (hoja.classList.contains('sin-logos')) c.querySelectorAll('.logo-img').forEach(x => x.remove());
+  if (paraWord) {   // Word respeta mejor el tamaño con width/height
+    const orig = [...hoja.querySelectorAll('img')], cop = [...c.querySelectorAll('img')];
+    cop.forEach((im, i) => { const o = orig.find(x => x.src === im.src) || orig[i]; if (o && o.width) { im.setAttribute('width', Math.round(o.width)); im.setAttribute('height', Math.round(o.height)); } });
+    c.querySelectorAll('[contenteditable]').forEach(x => x.removeAttribute('contenteditable'));
+  }
+  return c.innerHTML;
+}
+/* Word: archivo .doc en formato MHTML para que las imágenes (escudos y fotos) viajen dentro del documento */
+function archivoWord(cuerpo, horizontal) {
+  const imgs = [];
+  cuerpo = cuerpo.replace(/src="data:image\/(png|jpe?g|gif|webp);base64,([^"]+)"/g, (m, ext, b64) => { const e = ext === 'jpeg' ? 'jpg' : ext, n = 'imagen' + (imgs.length + 1) + '.' + e; imgs.push({ n, tipo: 'image/' + (e === 'jpg' ? 'jpeg' : e), b64 }); return `src="${n}"`; });
+  const pagina = horizontal ? '@page WordSection1{size:11.0in 8.5in;mso-page-orientation:landscape;margin:0.5in}' : '@page WordSection1{size:8.5in 11.0in;margin:0.5in}';
+  const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"><style>${pagina}div.WordSection1{page:WordSection1}${ESTILO_WORD}</style></head><body><div class="WordSection1${horizontal ? ' horizontal' : ''}">${cuerpo}</div></body></html>`;
+  const b64 = t => { const by = new TextEncoder().encode(t); let s = ''; for (let i = 0; i < by.length; i += 0x8000) s += String.fromCharCode.apply(null, by.subarray(i, i + 0x8000)); return btoa(s); };
+  const trozos = s => s.replace(/.{1,76}/g, '$&\r\n');
+  const B = '----=_EVAU_' + Date.now();
+  let m = `MIME-Version: 1.0\r\nContent-Type: multipart/related; boundary="${B}"; type="text/html"\r\n\r\n--${B}\r\nContent-Type: text/html; charset="utf-8"\r\nContent-Transfer-Encoding: base64\r\nContent-Location: file:///C:/evau/documento.htm\r\n\r\n${trozos(b64(html))}\r\n`;
+  imgs.forEach(i => { m += `--${B}\r\nContent-Type: ${i.tipo}\r\nContent-Transfer-Encoding: base64\r\nContent-Location: file:///C:/evau/${i.n}\r\n\r\n${trozos(i.b64)}\r\n`; });
+  return m + `--${B}--\r\n`;
+}
 function visorDoc(titulo, html, archivo, alGuardar, clase) {
-  const v = abrirModal(`<div class="no-imprime"><h2>${esc(titulo)}</h2><p>Revise el texto. Los recuadros punteados se pueden escribir. <strong>Es un borrador: quien lo firma es responsable de revisarlo.</strong></p>
-  <div class="fila">${alGuardar && puedeEditar() ? '<button id="g">Guardar en el expediente</button>' : ''}<button class="sec" id="imp">Imprimir o guardar como PDF</button><button class="sec" id="doc">Descargar en Word</button><button class="sec" id="cer">Cerrar</button></div><hr></div><div class="hoja ${clase || ''}" id="hoja">${html}</div>`, true);
-  const leer = () => $('#hoja', v).innerHTML;
-  if ($('#g', v)) $('#g', v).onclick = () => { alGuardar(leer()); v.cerrar(); };
+  const horizontal = /horizontal/.test(clase || ''), u = DB.usaer, hayLogos = !!(u.logoIzq || u.logoDer || u.logoExtra);
+  const v = abrirModal(`<div class="no-imprime"><h2>${esc(titulo)}</h2><p>Revise el texto. Los recuadros punteados se pueden escribir. <strong>Es un borrador: quien lo firma es responsable de revisarlo.</strong> Sale en tamaño carta${horizontal ? ' horizontal' : ''}, Arial, texto justificado y márgenes estrechos. <strong>«Descargar en Word»</strong> es para Microsoft Word en computadora (lleva escudos y fotos adentro); en el celular use <strong>«Imprimir o guardar como PDF»</strong>.</p>
+  <div class="fila">${alGuardar && puedeEditar() ? '<button id="g">Guardar en el expediente</button>' : ''}<button class="sec" id="imp">Imprimir o guardar como PDF</button><button class="sec" id="doc">Descargar en Word</button><button class="sec" id="cer">Cerrar</button></div>
+  <div class="fila"><label class="boton sec boton-archivo">📷 Agregar fotografías<input type="file" id="fotos" accept="image/*" multiple hidden></label>
+  ${hayLogos ? '<label class="chip-check"><input type="checkbox" id="conlogos" checked> Con escudos y logotipos</label>' : '<span class="nota">Para poner escudos o logotipos: Ajustes → Datos del servicio.</span>'}</div><hr></div><div class="hoja ${clase || ''}" id="hoja">${html}</div>`, true);
+  const hoja = $('#hoja', v);
+  const activarFotos = () => hoja.querySelectorAll('.quitar-foto').forEach(b => b.onclick = () => { const f = fotosDe(hoja); f.splice(Number(b.dataset.i), 1); pintarFotos(hoja, f); activarFotos(); });
+  if (!hoja.querySelector('.anexo-fotos .no-imprime')) pintarFotos(hoja, fotosDe(hoja));   // documentos guardados: vuelve a poner los botones
+  activarFotos();
+  $('#fotos', v).onchange = async e => {
+    const fs = [...e.target.files]; e.target.value = '';
+    const f = fotosDe(hoja);
+    for (const x of fs) { try { const r = await reducirImagen(x, 1400); f.push({ src: r.src, pie: 'Escriba aquí la descripción de la evidencia' }); } catch (er) { aviso('No se pudo leer «' + x.name + '».'); } }
+    pintarFotos(hoja, f); activarFotos(); hoja.querySelector('.anexo-fotos').scrollIntoView({ block: 'start' });
+    aviso(fs.length === 1 ? 'Fotografía agregada al final del documento.' : fs.length + ' fotografías agregadas al final del documento.');
+  };
+  if ($('#conlogos', v)) $('#conlogos', v).onchange = e => hoja.classList.toggle('sin-logos', !e.target.checked);
+  if ($('#g', v)) $('#g', v).onclick = () => { alGuardar(htmlLimpio(hoja)); v.cerrar(); };
   $('#imp', v).onclick = () => window.print();
-  $('#doc', v).onclick = () => descargar(archivoSeguro(archivo) + '.doc', `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"><style>${ESTILO_WORD}</style></head><body>${leer().replace(/ contenteditable="true"/g, '')}</body></html>`, 'application/msword');
+  $('#doc', v).onclick = () => descargar(archivoSeguro(archivo) + '.doc', archivoWord(htmlLimpio(hoja, true), horizontal), 'application/msword');
   $('#cer', v).onclick = () => v.cerrar();
   return v;
 }
@@ -353,7 +411,7 @@ const casilla = ok => ok ? '<strong>X</strong>' : '&nbsp;';
 function verBitacora(r) {
   const a = r.alumnoId && porId('alumnos', r.alumnoId), g = porId('grupos', r.grupoId || (a && a.grupoId)), e = porId('escuelas', (g || {}).escuelaId) || {}, inc = r.inc || { clasif: [], antec: [], acuerdos: '' };
   const filas2 = (lista, sel) => { let s = ''; for (let i = 0; i < lista.length; i += 2) s += `<tr>${[lista[i], lista[i + 1]].map(x => x ? `<td style="width:2.5em;text-align:center">${casilla(sel.includes(x))}</td><td>${sel.includes(x) ? '<strong>' + esc(x) + '</strong>' : esc(x)}</td>` : '<td></td><td></td>').join('')}</tr>`; return s; };
-  const html = `<h1>BITÁCORA DE INCIDENCIA Y SEGUIMIENTO</h1><p style="text-align:center"><strong>${esc((inc.clasif || []).join(' · ') || 'Incidencia')} — ${esc(flarga(r.fecha))}</strong></p>
+  const html = `${encabezadoInst()}<h1>BITÁCORA DE INCIDENCIA Y SEGUIMIENTO</h1><p style="text-align:center"><strong>${esc((inc.clasif || []).join(' · ') || 'Incidencia')} — ${esc(flarga(r.fecha))}</strong></p>
   <table><tr><th>Fecha de elaboración</th><td>${esc(flarga(hoy()))}</td><th>Grado y grupo</th><td>${esc(nomGrupo(g))}</td></tr><tr><th>Registró</th><td>${esc(nomUsuario(r.usuarioId))} (${esc(rolUsuario(r.usuarioId))})</td><th>Escuela</th><td>${esc(e.nombre || '')}</td></tr></table>
   <h2>1. Datos generales</h2><table><tr><th>${a ? 'Nombre del alumno' : 'Grupo'}</th><td>${esc(a ? a.nombre : 'Grupo ' + nomGrupo(g))}</td><th>Fecha de los hechos</th><td>${esc(flarga(r.fecha))} · ${esc(r.hora)}</td></tr></table>
   <h2>2. Clasificación de la situación presentada</h2><table>${filas2(CAT.incClasif, inc.clasif || [])}</table>
@@ -447,7 +505,7 @@ function vAjustes(v) {
   v.innerHTML = `<h1>Ajustes</h1>
   <div class="caja"><h2>Cuidado de la información</h2><p>La información se guarda <strong>solo en este dispositivo y en este navegador</strong>, sin cifrar; no se envía a ningún servidor. Use <strong>bloqueo de pantalla</strong> en el aparato, cambie su clave, descargue su respaldo seguido y compártalo solo con el equipo.</p></div>
   <div class="caja"><h2>Datos del servicio de apoyo (encabezado del plan)</h2><p><strong>${esc(u.unidad)}</strong><br>CCT: ${esc(u.cct)} · Turno: ${esc(u.turno)}<br>${esc(u.domicilio)}<br>Director(a) USAER: ${esc(u.directora)}<br>Encabezado: ${esc(u.encabezado)}<br>${esc(u.zona || '')}${u.lugar ? ' · ' + esc(u.lugar) : ''}</p>
-  <p><strong>Logotipos del encabezado</strong> (opcionales; van en el plan y en los formatos de comunicación):</p><div class="fila logos-aj">${['logoIzq', 'logoDer'].map((k, i) => `<div>${u[k] ? `<img src="${u[k]}" alt="Logotipo ${i ? 'derecho' : 'izquierdo'}" style="height:56px;border:1px solid #000">` : `<em>Sin logotipo ${i ? 'derecho' : 'izquierdo'}</em>`}<br>${ed(`<label class="sec chico boton-archivo">${u[k] ? 'Cambiar' : 'Agregar'} ${i ? 'derecho' : 'izquierdo'}<input type="file" accept="image/*" data-logo="${k}" hidden></label>${u[k] ? ` <button class="sec chico" data-qlogo="${k}">Quitar</button>` : ''}`)}</div>`).join('')}</div><p>Ciclo escolar: <strong>${esc(DB.config.ciclo)}</strong></p>${ed('<div class="fila"><button class="sec" id="usa">Editar datos del servicio</button><button class="sec" id="cfg">Cambiar ciclo escolar</button></div>')}</div>
+  <p><strong>Escudos y logotipos del encabezado</strong> (opcionales; van en todos los documentos, a los lados del texto, como en los formatos de la USAER; en cada documento se pueden quitar):</p><div class="fila logos-aj">${[['logoIzq', 'izquierdo'], ['logoDer', 'derecho'], ['logoExtra', 'derecho 2 (p. ej. USAER)']].map(([k, nom]) => `<div>${u[k] ? `<img src="${u[k]}" alt="Escudo ${nom}" style="height:56px;border:1px solid #000">` : `<em>Sin escudo ${nom}</em>`}<br>${ed(`<label class="sec chico boton-archivo">${u[k] ? 'Cambiar' : 'Agregar'} ${nom}<input type="file" accept="image/*" data-logo="${k}" hidden></label>${u[k] ? ` <button class="sec chico" data-qlogo="${k}">Quitar</button>` : ''}`)}</div>`).join('')}</div><p>Ciclo escolar: <strong>${esc(DB.config.ciclo)}</strong></p>${ed('<div class="fila"><button class="sec" id="usa">Editar datos del servicio</button><button class="sec" id="cfg">Cambiar ciclo escolar</button></div>')}</div>
   <div class="caja"><h2>Profesionales</h2><table><tr><th>Nombre</th><th>Función</th><th>Escuelas que atiende</th><th>Clave</th><th></th></tr>${DB.usuarios.map(x => `<tr><td>${esc(x.nombre)}</td><td>${esc(CAT.roles[x.rol])}</td><td>${esc(x.rol === 'direccion' ? 'Todas (consulta)' : escuelasDe(x))}</td><td>${x.clave ? 'Propia' + ed(` <button class="sec chico" data-reset="${x.id}">Volver a 0000</button>`) : '0000'}</td><td>${ed(`<button class="sec chico" data-u="${x.id}">Editar</button>`)}</td></tr>`).join('')}</table>${ed('<button class="sec" id="nu">＋ Agregar profesional</button>')}<div class="fila"><button class="sec" id="miclave">🔑 Cambiar mi clave</button></div><p class="nota">Cada persona entra con 0000 hasta que cambie su clave con «Cambiar mi clave». La clave protege la entrada, pero <strong>no cifra</strong> la información. Dirección consulta todo y escribe solo en la carpeta general de cada escuela. Si la directora también es maestra de apoyo, regístrela dos veces, una con cada función.</p><p class="nota">Cada maestra de apoyo suele atender una o dos escuelas, y cada escuela puede tener otro psicólogo. Marque las escuelas de cada persona: así el plan de intervención pone en «Participantes» solo al equipo de la escuela del alumno. La maestra de comunicación es una sola para toda la USAER: déjela sin escuelas marcadas y aparecerá en todas.</p></div>
   <div class="caja"><h2>Respaldo y trabajo en equipo</h2><p>El respaldo es un archivo con toda la información, las evidencias y los documentos de este dispositivo.</p>
   <div class="opcion-resp"><button id="exp">Descargar respaldo</button><p>Para guardar una copia, o para pasarle su trabajo a otra persona del equipo. <strong>Último respaldo descargado en este aparato:</strong> ${ultimoRespaldo() ? esc(flarga(ultimoRespaldo())) : 'ninguno'}.</p></div>

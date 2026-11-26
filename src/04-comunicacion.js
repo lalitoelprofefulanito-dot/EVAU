@@ -29,12 +29,16 @@ function edadAM(fn, fecha) {
 const fnCorta = f => f ? f.slice(8, 10) + '/' + f.slice(5, 7) + '/' + f.slice(2, 4) : '';
 const maestraCom = a => DB.usuarios.find(u => u.rol === 'comunicacion' && atiende(u, a.escuelaId)) || { nombre: '' };
 const MAYUS = s => esc(String(s || '').toUpperCase());
-function encabezadoInst(fechaRef) {
-  const u = DB.usaer;
-  const logos = u.logoIzq || u.logoDer ? `<div class="logos">${u.logoIzq ? `<img src="${u.logoIzq}" alt="">` : '<span></span>'}${u.logoDer ? `<img src="${u.logoDer}" alt="">` : '<span></span>'}</div>` : '';
-  return `${logos}<div class="enc-inst">${lineas(u.dependencia).map(l => `<p>${esc(l.toUpperCase())}</p>`).join('')}${u.zona ? `<p><strong>${MAYUS(u.zona)}</strong></p>` : ''}
+/* Encabezado oficial como en los formatos de la USAER: escudo a la izquierda, texto al centro y escudo(s) a la derecha */
+function logosEnc() {
+  const u = DB.usaer, img = x => x ? `<img class="logo-img" src="${x}" alt="">` : '';
+  return { izq: img(u.logoIzq), der: [u.logoDer, u.logoExtra].filter(Boolean).map(img).join(' ') };
+}
+function encabezadoInst() {
+  const u = DB.usaer, L = logosEnc();
+  return `<table class="enc-oficial"><tr><td class="enc-l">${L.izq}</td><td class="enc-t">${lineas(u.dependencia).map(l => `<p>${esc(l.toUpperCase())}</p>`).join('')}${u.zona ? `<p><strong>${MAYUS(u.zona)}</strong></p>` : ''}
   <p><strong>${MAYUS(u.unidad)}</strong></p><p><strong>C.C.T.: ${esc(u.cct)} &nbsp; TURNO: ${MAYUS(u.turno)}</strong></p><p>${MAYUS(u.domicilio)}</p>
-  <p><strong>CICLO ESCOLAR ${esc(DB.config.ciclo)}</strong></p>${u.leyenda ? `<p class="leyenda">«${esc(u.leyenda)}»</p>` : ''}</div>`;
+  <p><strong>CICLO ESCOLAR ${esc(DB.config.ciclo)}</strong></p>${u.leyenda ? `<p class="leyenda">«${esc(u.leyenda)}»</p>` : ''}</td><td class="enc-r">${L.der}</td></tr></table>`;
 }
 const firmasCom = (a, elaboro) => `<table class="firmas"><tr><td>${elaboro}<div class="linea"></div>MAESTRA DE COMUNICACIÓN<br><strong>${MAYUS(maestraCom(a).nombre)}</strong></td><td>Vo. Bo.<div class="linea"></div>DIRECTORA DE USAER<br><strong>${MAYUS(DB.usaer.directora)}</strong></td></tr></table>`;
 const lugarFecha = f => `<p style="text-align:right">${esc(DB.usaer.lugar || '')}${DB.usaer.lugar ? ', ' : ''}${esc(flarga(f))}</p>`;
@@ -108,7 +112,7 @@ function tComunicacion(t, a) {
   t.innerHTML = `<p>Lo llena la <strong>maestra de comunicación</strong>${mc.nombre ? ` (${esc(mc.nombre)})` : ''}. Sigue los formatos de comunicación de la USAER. Todos los cuadros se pueden dictar con 🎙.${c.actualizado ? ` Última actualización: ${esc(flarga(c.actualizado))}.` : ''}</p>
   <div class="fila"><h2>Plan de intervención individual · comunicación</h2><span class="sep"></span><button id="vpc">🖨 Ver, imprimir o Word</button></div>${bloque('plan', SECCIONES_PCOM, c.plan)}
   <div class="fila"><h2>Informe final de comunicación</h2><span class="sep"></span><button id="vic">🖨 Ver, imprimir o Word</button></div>${bloque('informe', SECCIONES_ICOM, c.informe)}`;
-  $('#vpc', t).onclick = () => visorDoc('Plan de comunicación · ' + a.nombre, htmlPlanCom(a, c), 'Plan_comunicacion_' + a.nombre + '_' + DB.config.ciclo, null, 'plan');
+  $('#vpc', t).onclick = () => visorDoc('Plan de comunicación · ' + a.nombre, htmlPlanCom(a, c), 'Plan_comunicacion_' + a.nombre + '_' + DB.config.ciclo, null, 'plan horizontal');
   $('#vic', t).onclick = () => {
     const prev = DB.informes.find(i => i.alumnoId === a.id && i.tipo === 'Final de comunicación' && i.ciclo === DB.config.ciclo);
     const inf = prev ? Object.assign({}, prev, { html: htmlInfCom(a, c) }) : { id: uid(), alumnoId: a.id, tipo: 'Final de comunicación', ciclo: DB.config.ciclo, desde: ciclo().ini, hasta: c.informe.fecha || hoy(), fecha: hoy(), usuarioId: USUARIO.id, html: htmlInfCom(a, c) };

@@ -59,18 +59,19 @@ function htmlFinalApoyo(a, c) {
   <table class="firmas"><tr><td>Elaboró<div class="linea"></div><strong>${MAYUS(maestraApoyoDe(a).nombre)}</strong><br>MAESTRA(O) DE APOYO</td><td>Vo. Bo.<div class="linea"></div><strong>${MAYUS(DB.usaer.directora)}</strong><br>DIRECTORA DE LA USAER</td></tr></table>`;
 }
 /* Llenar con lo que ya hay: solo cuadros vacíos, a partir del plan, de comunicación y de los registros del ciclo */
+const unirOraciones = xs => xs.map(x => String(x).trim().replace(/[.;]+$/, '')).filter(Boolean).join('. ') + '.';
 function propuestaFinal(a) {
   const p = DB.planes[a.id], cm = (DB.comunicacion || {})[a.id], cic = ciclo(), o = {};
   if (p) {
     const fort = CAT.areas.flatMap(ar => p.areas[ar].fortalezas), opo = CAT.areas.flatMap(ar => p.areas[ar].oportunidades);
-    if (fort.length) o.fortalezas = fort.join('. ').replace(/\.\./g, '.') + '.';
-    if (opo.length) o.oportunidades = opo.join('. ').replace(/\.\./g, '.') + '.';
+    if (fort.length) o.fortalezas = unirOraciones(fort);
+    if (opo.length) o.oportunidades = unirOraciones(opo);
     const soc = [...p.areas['Sociales'].fortalezas, ...p.areas['Sociales'].oportunidades];
-    if (soc.length) o.social = soc.join('. ') + '.';
+    if (soc.length) o.social = unirOraciones(soc);
     const bap = CAT.bapCats.flatMap(k => p.bap[k]);
-    if (bap.length) o.bap = bap.join('. ') + '.';
+    if (bap.length) o.bap = unirOraciones(bap);
     const rec = [...CAT.aula.map(k => p.aula[k].adecuacion), ...CAT.apoyos.map(k => p.apoyos[k].adecuacion), ...(p.curriculo['Metodología'] || [])].filter(Boolean);
-    if (rec.length) o.recursos = rec.join('. ') + '.';
+    if (rec.length) o.recursos = unirOraciones(rec);
   }
   if (cm && cm.informe && (cm.informe.etapa || '').trim()) o.comunicacion = cm.informe.etapa;
   const logros = vigentes().filter(r => r.alumnoId === a.id && r.fecha >= cic.ini && r.fecha <= cic.fin && (r.marcas || []).includes('Logro')).sort((x, y) => x.fecha.localeCompare(y.fecha));

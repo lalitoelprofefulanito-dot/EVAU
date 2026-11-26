@@ -96,7 +96,7 @@ function tPsicologia(t, a) {
   <div class="fila"><h2>Informe final de psicología</h2><span class="sep"></span><button id="vip">🖨 Ver, imprimir o Word</button></div>
   ${caja('Dominios conceptual, práctico y social', 'informe|dominios', `<p><strong>Fecha:</strong> ${esc(flarga(x.fecha) || '—')}</p>${['conceptual', 'practico', 'social'].map(k => `<p><strong>${{ conceptual: 'Conceptual', practico: 'Práctico', social: 'Social' }[k]}:</strong> ${esc((x[k] || '—').slice(0, 160))}${(x[k] || '').length > 160 ? '…' : ''}</p>`).join('')}`)}
   ${caja('Sugerencias', 'informe|sug', `<p><strong>Padres de familia</strong></p>${ul(x.sugPadres) || '<p>—</p>'}<p><strong>Maestro de grupo</strong></p>${ul(x.sugMaestro) || '<p>—</p>'}`)}`;
-  $('#vpp', t).onclick = () => visorDoc('Plan de psicología · ' + a.nombre, htmlPlanPsi(a, c), 'Plan_psicologia_' + a.nombre + '_' + DB.config.ciclo, null, 'plan');
+  $('#vpp', t).onclick = () => visorDoc('Plan de psicología · ' + a.nombre, htmlPlanPsi(a, c), 'Plan_psicologia_' + a.nombre + '_' + DB.config.ciclo, null, 'plan horizontal');
   $('#vip', t).onclick = () => {
     const prev = DB.informes.find(i => i.alumnoId === a.id && i.tipo === 'Final de psicología' && i.ciclo === DB.config.ciclo);
     const inf = prev ? Object.assign({}, prev, { html: htmlInfPsi(a, c) }) : { id: uid(), alumnoId: a.id, tipo: 'Final de psicología', ciclo: DB.config.ciclo, desde: ciclo().ini, hasta: x.fecha || hoy(), fecha: hoy(), usuarioId: USUARIO.id, html: htmlInfPsi(a, c) };

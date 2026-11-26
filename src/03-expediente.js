@@ -224,7 +224,8 @@ function htmlPlan(a, p, edit) {
   const enc = `<div class="encab"><strong>NOMBRE DEL ALUMNO:</strong> <u>${esc(a.nombre.toUpperCase())}</u> &nbsp; <strong>GRADO Y GRUPO:</strong> <u>${esc(nomGrupo(g))}</u><br><strong>ESCUELA PRIMARIA:</strong> <u>${esc((e.nombre || '').toUpperCase())}</u> &nbsp; <strong>CICLO ESCOLAR:</strong> <u>${esc(DB.config.ciclo)}</u><br>${esc(u.encabezado)} <strong><u>${esc(a.condicion.toUpperCase())}</u></strong></div>`;
   const cuerpo = SECCIONES.map(([k, tit, fn]) => `<h2>${esc(tit.toUpperCase())}</h2>${fn(p, a, edit)}`).join('')
     .replace(/<table([^>]*)><tr>((?:<th[^>]*>[\s\S]*?<\/th>)+)<\/tr>/g, '<table$1><thead><tr>$2</tr></thead>');
-  return `<div class="portada">${u.logoIzq || u.logoDer ? `<div class="logos">${u.logoIzq ? `<img src="${u.logoIzq}" alt="">` : '<span></span>'}${u.logoDer ? `<img src="${u.logoDer}" alt="">` : '<span></span>'}</div>` : ''}<p><strong>${esc(u.unidad)}</strong><br><strong>C.C.T.: ${esc(u.cct)} &nbsp; TURNO: ${esc(u.turno)}</strong><br>${esc(u.domicilio)}</p>
+  const L = logosEnc();
+  return `<div class="portada">${L.izq || L.der ? `<table class="enc-oficial"><tr><td class="enc-l">${L.izq}</td><td class="enc-t"></td><td class="enc-r">${L.der}</td></tr></table>` : ''}<p><strong>${esc(u.unidad)}</strong><br><strong>C.C.T.: ${esc(u.cct)} &nbsp; TURNO: ${esc(u.turno)}</strong><br>${esc(u.domicilio)}</p>
   <p class="t-plan">PLAN DE INTERVENCIÓN EDUCATIVA</p><p><strong>NIVEL EDUCATIVO:</strong><br>PRIMARIA</p><p><strong>NOMBRE DEL ALUMNO:</strong><br><u>${esc(a.nombre.toUpperCase())}</u></p><p><strong>CICLO ESCOLAR ${esc(DB.config.ciclo)}</strong></p><p><strong>GRADO Y GRUPO:</strong><br>${esc(nomGrupo(g))}</p><p class="nota">Formato de uso en la USAER · datos ficticios de prueba</p></div>
   <div class="salto"></div><table class="marco"><thead><tr><td>${enc}</td></tr></thead><tbody><tr><td>${cuerpo}</td></tr></tbody></table>`;
 }
@@ -263,7 +264,7 @@ function armarInforme(a, tipo, desde, hasta) {
   const fila = (k, v1, k2, v2) => `<tr><th>${k}</th><td>${esc(v1 || '')}</td><th>${k2}</th><td>${esc(v2 || '')}</td></tr>`;
   const porAreaHTML = obj => Object.entries(obj).map(([ar, rs]) => `<p><strong>${esc(ar)}</strong></p>${ul(rs.map(vineta))}`).join('');
   let n = 1; const h = t => `<h2>${n++}. ${t}</h2>`;
-  let s = `<h1>${fam ? 'INFORME PARA LA FAMILIA' : 'INFORME DE SEGUIMIENTO DEL ALUMNO'}<br>${fam ? '' : esc(tipo.replace('Seguimiento — ', '').toUpperCase())}</h1>
+  let s = `${encabezadoInst()}<h1>${fam ? 'INFORME PARA LA FAMILIA' : 'INFORME DE SEGUIMIENTO DEL ALUMNO'}<br>${fam ? '' : esc(tipo.replace('Seguimiento — ', '').toUpperCase())}</h1>
   <p style="text-align:center"><strong>Elaborado con el registro cronológico · formato de uso común (no oficial)</strong></p>
   ${h('Datos de identificación')}<table>${fila('Escuela', e.nombre, 'CCT', e.cct)}${fila('Servicio de apoyo', DB.usaer.unidad, 'Ciclo escolar', DB.config.ciclo)}${fila('Alumno', a.nombre, 'Grado y grupo', nomGrupo(g))}${fila('Periodo', 'Del ' + flarga(desde) + ' al ' + flarga(hasta), 'Registros analizados', String(an.regs.length))}${fila('Elaboró', USUARIO.nombre, 'Fecha', flarga(hoy()))}</table>`;
   if (fam) {
