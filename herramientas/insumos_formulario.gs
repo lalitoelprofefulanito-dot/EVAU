@@ -1,5 +1,5 @@
 /**
- * EVAU · Formulario de insumos pendientes (versión 1.7.0, 25/11/2026)
+ * EVAU · Formulario de insumos pendientes (versión 1.7.1, 25/11/2026)
  *
  * Qué hace: crea en SU cuenta de Google un formulario con los insumos que faltan
  * para terminar EVAU y una hoja de cálculo donde se guardan las respuestas.
@@ -85,13 +85,12 @@ function crearFormularioInsumos() {
   quienSabe(form);
 
   // ---------- 4. Formatos en blanco ----------
-  seccion(form, '4. Formatos que faltan (en blanco o con datos tapados)',
+  seccion(form, '4. El formato que falta (en blanco o con datos tapados)',
     'Para cada formato, suba el archivo a Google Drive, compártalo «Cualquier persona con el enlace» y pegue aquí el enlace. ' +
     'Si es más fácil, mándelo por WhatsApp a Eduardo. Si su USAER no usa ese formato, márquelo.\n' +
     'Ya NO hacen falta: Plan de intervención, formatos de comunicación, formatos de psicología (plan e informe final), Informe final, Evaluación psicopedagógica, Ámbito ni Plantilla interna.');
   [
-    'Informe de seguimiento (si es distinto del Plan de intervención)',
-    'Formato de detección inicial'
+    'Informe de psicología (solo cuando el psicólogo de la USAER determina un diagnóstico)'
   ].forEach(nombre => {
     opciones(form.addMultipleChoiceItem().setTitle(nombre + ': ¿cómo lo envía?'),
       ['Pego el enlace de Drive abajo', 'Lo mando por WhatsApp a Eduardo', 'Lo tiene otra persona (escribo quién al final)', 'Nuestra USAER no usa este formato']);
@@ -99,17 +98,8 @@ function crearFormularioInsumos() {
   });
   quienSabe(form);
 
-  // ---------- 5. Cuándo se entrega cada informe ----------
-  seccion(form, '5. Cuándo se entrega cada informe',
-    'Marque en qué meses se entrega cada uno. Así EVAU avisa cuándo falta.');
-  form.addCheckboxGridItem().setTitle('Meses de entrega')
-    .setRows(['Informe de evaluación psicopedagógica', 'Informe de seguimiento'])
-    .setColumns(['Ago', 'Sep', 'Oct', 'Nov', 'Dic', 'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul']);
-  form.addParagraphTextItem().setTitle('Algo más sobre las fechas (por ejemplo: «solo a alumnos de nuevo ingreso»)');
-  quienSabe(form);
-
   // ---------- 6. Datos reales y trabajo en equipo ----------
-  seccion(form, '6. Para usar EVAU con datos reales (lo decide la directora)',
+  seccion(form, '5. Para usar EVAU con datos reales (lo decide la directora)',
     'Hoy EVAU solo debe usarse con datos de prueba. Estas respuestas dicen qué falta para usarla con alumnos reales.');
   opciones(form.addMultipleChoiceItem().setTitle('¿La directora autoriza usar EVAU con datos reales de alumnos?'),
     ['Sí, por escrito', 'Sí, de palabra', 'Todavía no', 'Falta preguntarle']);
@@ -123,7 +113,7 @@ function crearFormularioInsumos() {
   quienSabe(form);
 
   // ---------- 7. Cierre ----------
-  seccion(form, '7. Para terminar', '');
+  seccion(form, '6. Para terminar', '');
   form.addParagraphTextItem().setTitle('¿Algo más que EVAU deba hacer o que le estorbe?');
 
   // ---------- Hoja de respuestas ----------

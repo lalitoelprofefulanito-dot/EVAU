@@ -156,3 +156,8 @@ label.boton{display:inline-block}
 .boton-archivo{display:inline-block;cursor:pointer;border:2px solid #0f2f5c;border-radius:8px;padding:.3rem .7rem;font-weight:bold}
 .resaltar{outline:4px solid #f5a300;outline-offset:4px}
 .aviso-resp p{margin:0 0 .5rem}
+.docs-area{margin:.4rem 0 .2rem;padding-left:.6rem;border-left:4px solid #0f2f5c}
+.docs-tit{display:block;font-weight:bold;color:#0f2f5c;margin:.2rem 0}
+.doc-item.opc{color:#222}
+.docs-area .doc-item{display:block;margin:.25rem 0}
+.docs > .doc-item{display:block;margin:.25rem 0}

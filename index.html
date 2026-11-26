@@ -167,6 +167,11 @@ label.boton{display:inline-block}
 .boton-archivo{display:inline-block;cursor:pointer;border:2px solid #0f2f5c;border-radius:8px;padding:.3rem .7rem;font-weight:bold}
 .resaltar{outline:4px solid #f5a300;outline-offset:4px}
 .aviso-resp p{margin:0 0 .5rem}
+.docs-area{margin:.4rem 0 .2rem;padding-left:.6rem;border-left:4px solid #0f2f5c}
+.docs-tit{display:block;font-weight:bold;color:#0f2f5c;margin:.2rem 0}
+.doc-item.opc{color:#222}
+.docs-area .doc-item{display:block;margin:.25rem 0}
+.docs > .doc-item{display:block;margin:.25rem 0}
 
 </style>
 </head>
@@ -175,7 +180,7 @@ label.boton{display:inline-block}
 <script>
 'use strict';
 /* EVAU · Expediente Vivo de Atención USAER/UDEEI · núcleo: utilidades, catálogos, almacenamiento y dictado */
-const VERSION = '1.7.0';
+const VERSION = '1.7.1';
 const CLAVE = '0000';
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -1220,20 +1225,29 @@ function vAjustes(v) {
 /* EVAU · expediente del alumno, plan de intervención (formato real), análisis de registros e informes */
 const TABS = [['historial', 'Registro cronológico'], ['plan', 'Plan de intervención'], ['informes', 'Informes'], ['evaluacion', 'Evaluación e informe final'], ['psicologia', 'Psicología'], ['comunicacion', 'Comunicación'], ['datos', 'Datos y documentos'], ['evidencias', 'Evidencias'], ['valoracion', 'Valoración']];
 
+/* Documentos del ciclo por área, como los entrega cada una (maestra de apoyo, 25/11/2026):
+   apoyo: plan de intervención (se entrega en oct.–nov. con la información del fin de ciclo), evaluación psicopedagógica e informe final;
+   psicología y comunicación: plan de intervención e informe final; informe de psicología solo si el psicólogo determinó el diagnóstico. */
 function cajaDocumentos(a) {
   const c = DB.config.ciclo, prev = (Number(c.slice(0, 4)) - 1) + '-' + c.slice(0, 4);
   const docs = DB.documentos.filter(d => d.alumnoId === a.id);
-  const cons = (a.consentimiento || {}).estado === 'Activo' || docs.some(d => d.tipo === 'Consentimiento informado');
-  const plan = planTieneContenido(DB.planes[a.id]) || docs.some(d => d.tipo === 'Plan de intervención' && d.ciclo === c);
-  const inf = (tipo, cic) => DB.informes.some(i => i.alumnoId === a.id && i.tipo === tipo && (!cic || i.ciclo === cic));
-  const finalAnt = docs.some(d => d.tipo === 'Informe final' && d.ciclo === prev) || inf('Final de la maestra de apoyo', prev);
   const doc = (tipo, cic) => docs.some(d => d.tipo === tipo && (!cic || d.ciclo === cic));
-  const it = (ok, txt, ir) => `<a href="#alumno/${a.id}/${ir}" class="doc-item ${ok ? 'ok' : 'falta'}"><span aria-hidden="true">${ok ? '✅' : '⬜'}</span> ${txt}${ok ? '' : ' <span class="etq r">Falta</span>'}</a>`;
+  const inf = (tipo, cic) => DB.informes.some(i => i.alumnoId === a.id && i.tipo === tipo && (!cic || i.ciclo === cic));
+  const cons = (a.consentimiento || {}).estado === 'Activo' || doc('Consentimiento informado');
+  const it = (clave, ok, txt, ir, cuando, opcional) => `<a href="#alumno/${a.id}/${ir}" data-doc="${clave}" class="doc-item ${ok ? 'ok' : opcional ? 'opc' : 'falta'}"><span aria-hidden="true">${ok ? '✅' : opcional ? '➖' : '⬜'}</span> ${txt}${cuando ? ` <span class="nota">· ${cuando}</span>` : ''}${ok || opcional ? '' : ' <span class="etq r">Falta</span>'}</a>`;
+  const grupo = (tit, items) => `<div class="docs-area"><span class="docs-tit">${tit}</span>${items}</div>`;
+  const finalApoyo = doc('Informe final', c) || inf('Final de la maestra de apoyo', c) || inf('Final del ciclo', c);
   if (!determinado(a)) {
-    const finalCiclo = doc('Informe final', c) || DB.informes.some(i => i.alumnoId === a.id && i.tipo === 'Final del ciclo') || inf('Final de la maestra de apoyo', c);
-    return `<div class="docs"><strong>Documentos · sin diagnóstico</strong>${it(cons, 'Consentimiento informado', 'datos')}${it(finalCiclo, 'Informe final ' + esc(c), 'evaluacion')}<span class="nota">Solo lleva el informe final del ciclo: sin plan de intervención, propuesta ni evaluación psicopedagógica.</span></div>`;
+    return `<div class="docs"><strong>Documentos ${esc(c)} · sin diagnóstico</strong>${it('cons', cons, 'Consentimiento informado', 'datos')}${it('apoyo-final', finalApoyo || DB.informes.some(i => i.alumnoId === a.id && i.tipo === 'Final del ciclo'), 'Informe final', 'evaluacion', 'fin de ciclo')}<span class="nota">Solo lleva el informe final del ciclo: sin plan de intervención, propuesta ni evaluación psicopedagógica.</span></div>`;
   }
-  return `<div class="docs"><strong>Documentos</strong>${it(cons, 'Consentimiento informado', 'datos')}${it(plan, 'Plan de intervención ' + esc(c), 'plan')}${it(doc('Informe de evaluación psicopedagógica') || inf('Evaluación psicopedagógica'), 'Informe psicopedagógico', 'evaluacion')}${it(doc('Informe psicológico', c) || DB.informes.some(i => i.alumnoId === a.id && i.tipo === 'Final de psicología' && i.ciclo === c), 'Informe psicológico ' + esc(c), 'datos')}${it(doc('Informe de comunicación', c) || DB.informes.some(i => i.alumnoId === a.id && i.tipo === 'Final de comunicación' && i.ciclo === c), 'Informe de comunicación ' + esc(c), 'datos')}${it(finalAnt, 'Informe final ' + esc(prev), 'datos')}${it(doc('Informe final', c) || inf('Final de la maestra de apoyo', c), 'Informe final ' + esc(c), 'evaluacion')}</div>`;
+  const psi = (DB.psicologia || {})[a.id], com = (DB.comunicacion || {})[a.id];
+  const planPsi = !!(psi && psi.plan.areas.length) || doc('Plan de psicología', c);
+  const planCom = !!(com && Object.values(com.plan.funciones).some(x => x.length)) || doc('Plan de comunicación', c);
+  return `<div class="docs"><strong>Documentos ${esc(c)}</strong>${it('cons', cons, 'Consentimiento informado', 'datos')}
+  ${grupo('Maestra de apoyo', it('apoyo-plan', planTieneContenido(DB.planes[a.id]) || doc('Plan de intervención', c), 'Plan de intervención', 'plan', 'se entrega en oct.–nov.') + it('apoyo-eval', doc('Informe de evaluación psicopedagógica', c) || inf('Evaluación psicopedagógica', c), 'Evaluación psicopedagógica', 'evaluacion', 'fin de ciclo') + it('apoyo-final', finalApoyo, 'Informe final', 'evaluacion', 'fin de ciclo'))}
+  ${grupo('Psicología', it('psi-plan', planPsi, 'Plan de atención / intervención', 'psicologia') + it('psi-final', inf('Final de psicología', c) || doc('Informe final de psicología', c), 'Informe final de psicología', 'psicologia', 'fin de ciclo') + it('psi-dx', doc('Informe psicológico'), 'Informe de psicología', 'datos', 'solo si el psicólogo de la USAER determinó el diagnóstico', true))}
+  ${grupo('Comunicación', it('com-plan', planCom, 'Plan de intervención de comunicación', 'comunicacion') + it('com-final', inf('Final de comunicación', c) || doc('Informe de comunicación', c), 'Informe final de comunicación', 'comunicacion', 'fin de ciclo'))}
+  ${it('final-ant', doc('Informe final', prev) || inf('Final de la maestra de apoyo', prev), 'Informe final ' + esc(prev), 'datos', 'si ya lo atendía la USAER', true)}</div>`;
 }
 function vAlumno(v, id, tab) {
   const a = porId('alumnos', id); if (!a) return vInicio(v);
