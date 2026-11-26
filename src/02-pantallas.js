@@ -98,6 +98,13 @@ function cargarEjemplo() {
   Object.assign(ps.informe, { conceptual: 'Texto de ejemplo del dominio conceptual.', practico: 'Texto de ejemplo del dominio práctico.', social: 'Texto de ejemplo del dominio social.', sugPadres: ['Sugerencia de ejemplo para la familia.'], sugMaestro: ['Sugerencia de ejemplo para el maestro de grupo.'] });
   ps.actualizado = '2026-10-20';
   d.psicologia = { a1: ps };
+  const ap = apoyoVacio();   // evaluación psicopedagógica e informe final: contenido de ejemplo, ficticio
+  Object.assign(ap.eval, { madre: 'Madre Ficticia', ocupMadre: 'Ejemplo', padre: 'Padre Ficticio', ocupPadre: 'Ejemplo', motivo: 'Texto de ejemplo del motivo de la evaluación.', tecnicas: 'Texto de ejemplo de los instrumentos.', cognitiva: 'Texto de ejemplo del área cognitiva y académica.', conclusion: 'Texto de ejemplo de la conclusión.' });
+  ap.eval.necEscolar = ['Necesidad de ejemplo en la escuela.']; ap.eval.recomendaciones = ['Recomendación de ejemplo.'];
+  Object.assign(ap.final, { fecha: '2026-11-20', intro: 'Texto de ejemplo de la presentación del alumno.', habilidades: 'Texto de ejemplo de habilidades.' });
+  ap.final.campos['Lenguajes'] = 'Texto de ejemplo de Lenguajes.';
+  ap.actualizado = '2026-11-20';
+  d.apoyo = { a1: ap };
   d.documentos = [{ id: 'd1', alumnoId: 'a1', tipo: 'Informe final', ciclo: '2025-2026', nombre: 'informe_final_2025-2026.pdf (ejemplo sin archivo)', tipoArchivo: '', fecha: '2026-07-08', sinArchivo: true }];
   d.valoraciones = { a1: { 0: { i: 'R', m: 'P', f: '', ev: 'Registros de lectura de octubre y noviembre.' } } };
   DB = d; calcularHuellas();

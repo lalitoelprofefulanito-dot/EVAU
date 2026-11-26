@@ -1,19 +1,20 @@
 /* EVAU · expediente del alumno, plan de intervención (formato real), análisis de registros e informes */
-const TABS = [['historial', 'Registro cronológico'], ['plan', 'Plan de intervención'], ['informes', 'Informes'], ['psicologia', 'Psicología'], ['comunicacion', 'Comunicación'], ['datos', 'Datos y documentos'], ['evidencias', 'Evidencias'], ['valoracion', 'Valoración']];
+const TABS = [['historial', 'Registro cronológico'], ['plan', 'Plan de intervención'], ['informes', 'Informes'], ['evaluacion', 'Evaluación e informe final'], ['psicologia', 'Psicología'], ['comunicacion', 'Comunicación'], ['datos', 'Datos y documentos'], ['evidencias', 'Evidencias'], ['valoracion', 'Valoración']];
 
 function cajaDocumentos(a) {
   const c = DB.config.ciclo, prev = (Number(c.slice(0, 4)) - 1) + '-' + c.slice(0, 4);
   const docs = DB.documentos.filter(d => d.alumnoId === a.id);
   const cons = (a.consentimiento || {}).estado === 'Activo' || docs.some(d => d.tipo === 'Consentimiento informado');
   const plan = planTieneContenido(DB.planes[a.id]) || docs.some(d => d.tipo === 'Plan de intervención' && d.ciclo === c);
-  const finalAnt = docs.some(d => d.tipo === 'Informe final' && d.ciclo === prev);
+  const inf = (tipo, cic) => DB.informes.some(i => i.alumnoId === a.id && i.tipo === tipo && (!cic || i.ciclo === cic));
+  const finalAnt = docs.some(d => d.tipo === 'Informe final' && d.ciclo === prev) || inf('Final de la maestra de apoyo', prev);
   const doc = (tipo, cic) => docs.some(d => d.tipo === tipo && (!cic || d.ciclo === cic));
   const it = (ok, txt, ir) => `<a href="#alumno/${a.id}/${ir}" class="doc-item ${ok ? 'ok' : 'falta'}"><span aria-hidden="true">${ok ? '✅' : '⬜'}</span> ${txt}${ok ? '' : ' <span class="etq r">Falta</span>'}</a>`;
   if (!determinado(a)) {
-    const finalCiclo = doc('Informe final', c) || DB.informes.some(i => i.alumnoId === a.id && i.tipo === 'Final del ciclo');
-    return `<div class="docs"><strong>Documentos · sin diagnóstico</strong>${it(cons, 'Consentimiento informado', 'datos')}${it(finalCiclo, 'Informe final ' + esc(c), 'informes')}<span class="nota">Solo lleva el informe final del ciclo: sin plan de intervención, propuesta ni evaluación psicopedagógica.</span></div>`;
+    const finalCiclo = doc('Informe final', c) || DB.informes.some(i => i.alumnoId === a.id && i.tipo === 'Final del ciclo') || inf('Final de la maestra de apoyo', c);
+    return `<div class="docs"><strong>Documentos · sin diagnóstico</strong>${it(cons, 'Consentimiento informado', 'datos')}${it(finalCiclo, 'Informe final ' + esc(c), 'evaluacion')}<span class="nota">Solo lleva el informe final del ciclo: sin plan de intervención, propuesta ni evaluación psicopedagógica.</span></div>`;
   }
-  return `<div class="docs"><strong>Documentos</strong>${it(cons, 'Consentimiento informado', 'datos')}${it(plan, 'Plan de intervención ' + esc(c), 'plan')}${it(doc('Informe de evaluación psicopedagógica'), 'Informe psicopedagógico', 'datos')}${it(doc('Informe psicológico', c) || DB.informes.some(i => i.alumnoId === a.id && i.tipo === 'Final de psicología' && i.ciclo === c), 'Informe psicológico ' + esc(c), 'datos')}${it(doc('Informe de comunicación', c) || DB.informes.some(i => i.alumnoId === a.id && i.tipo === 'Final de comunicación' && i.ciclo === c), 'Informe de comunicación ' + esc(c), 'datos')}${it(finalAnt, 'Informe final ' + esc(prev), 'datos')}</div>`;
+  return `<div class="docs"><strong>Documentos</strong>${it(cons, 'Consentimiento informado', 'datos')}${it(plan, 'Plan de intervención ' + esc(c), 'plan')}${it(doc('Informe de evaluación psicopedagógica') || inf('Evaluación psicopedagógica'), 'Informe psicopedagógico', 'evaluacion')}${it(doc('Informe psicológico', c) || DB.informes.some(i => i.alumnoId === a.id && i.tipo === 'Final de psicología' && i.ciclo === c), 'Informe psicológico ' + esc(c), 'datos')}${it(doc('Informe de comunicación', c) || DB.informes.some(i => i.alumnoId === a.id && i.tipo === 'Final de comunicación' && i.ciclo === c), 'Informe de comunicación ' + esc(c), 'datos')}${it(finalAnt, 'Informe final ' + esc(prev), 'datos')}${it(doc('Informe final', c) || inf('Final de la maestra de apoyo', c), 'Informe final ' + esc(c), 'evaluacion')}</div>`;
 }
 function vAlumno(v, id, tab) {
   const a = porId('alumnos', id); if (!a) return vInicio(v);
@@ -24,7 +25,7 @@ function vAlumno(v, id, tab) {
   ${cajaDocumentos(a)}
   <div class="pestanas">${TABS.filter(t => determinado(a) || t[0] !== 'valoracion').map(t => `<a href="#alumno/${id}/${t[0]}" class="${t[0] === tab ? 'activo' : ''}">${t[1]}</a>`).join('')}</div><div id="tab"></div>`;
   if (tab === 'valoracion' && !determinado(a)) tab = 'historial';   // sin diagnóstico no lleva valoración
-  ({ datos: tDatos, historial: tHistorial, evidencias: tEvidencias, valoracion: tValoracion, plan: tPlan, informes: tInformes, psicologia: tPsicologia, comunicacion: tComunicacion }[tab] || tHistorial)($('#tab'), a);
+  ({ datos: tDatos, historial: tHistorial, evidencias: tEvidencias, valoracion: tValoracion, plan: tPlan, informes: tInformes, evaluacion: tEvaluacion, psicologia: tPsicologia, comunicacion: tComunicacion }[tab] || tHistorial)($('#tab'), a);
 }
 
 /* ---------- Datos y documentos ---------- */

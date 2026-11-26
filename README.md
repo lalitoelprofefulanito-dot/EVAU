@@ -1,4 +1,4 @@
-# EVAU · Expediente Vivo de Atención USAER/UDEEI (versión 1.6.0)
+# EVAU · Expediente Vivo de Atención USAER/UDEEI (versión 1.7.0)
 
 Prototipo de aplicación web (PWA) para sustituir la carpeta física de la maestra de apoyo.
 **Usar solo con datos ficticios.** Clave de acceso: **0000**.
@@ -17,6 +17,7 @@ Prototipo de aplicación web (PWA) para sustituir la carpeta física de la maest
 - **Informes de corte** que analizan los registros: fortalezas, dificultades persistentes, apoyos, avance en el nivel de apoyo, comunicación con la familia y recomendaciones.
 - **Bitácora de incidencia** imprimible, carpetas de grupo, estadística 911 USAER-1, respaldo con documentos, bitácora de acciones.
 - **Alumnos con y sin diagnóstico (1.2):** «En detección» y las tres «Dificultad severa de conducta / comunicación / aprendizaje» no llevan plan de intervención ni evaluación psicopedagógica: su caja de documentos pide solo consentimiento e informe final del ciclo, y solo pueden generar el informe final del ciclo (1.3.1: sin informe para la familia ni pestaña de valoración, confirmado por la maestra el 23/11/2026). En la carpeta se muestran como «Sin diagnóstico». Con diagnóstico, la caja pide además informe psicopedagógico, psicológico y de comunicación.
+- **Evaluación psicopedagógica e informe final de la maestra de apoyo (1.7.0):** pestaña «Evaluación e informe final» con el **Informe de evaluación psicopedagógica** (17 apartados; personal participante y firmas del equipo de la escuela) y el **Informe final** (presentación, habilidades, fortalezas, áreas de oportunidad, comunicación, social, competencia curricular por campo formativo, BAP, recursos, acciones de la USAER, recomendaciones, evaluación y observaciones), con la estructura de los formatos de la maestra de apoyo. «✨ Llenar con lo que ya hay» propone, solo en cuadros vacíos, texto del plan, de comunicación y de los registros marcados como logro. Los alumnos sin diagnóstico solo llevan el informe final.
 - **Área de psicología (1.6.0):** pestaña «Psicología» con el **Plan de atención / intervención** (modalidad, sesiones, periodo, DX y una o más áreas de desarrollo con funciones, secuencia de actividades, indicadores, campos formativos, aprendizajes facilitados y adecuaciones) y el **Informe final de psicología** (datos personales, dominios conceptual, práctico y social, y sugerencias a padres y maestro de grupo), con la estructura de los formatos de los psicólogos de la USAER. El informe guardado marca «Informe psicológico» en la caja de documentos. «Pedir por voz» entiende «plan / informe de psicología de…».
 - **Pedir por voz, clave personal, CURP y respaldos (1.5.0)** (lo platicado con la maestra de apoyo el 25/11/2026):
   - Botón **«🗣 Pedir»** arriba: se le habla como a un secretario («nuevo registro de Juan», «imprime el plan de Ana», «informe de comunicación de Luis», «descarga el respaldo», «ve a escuelas»). Si el nombre se parece a varios, pregunta a quién.
@@ -40,7 +41,7 @@ manifest.webmanifest    Instalación en celular
 sw.js                   Funcionamiento sin internet (solo archivos de la app)
 icons/                  Iconos
 src/                    Código fuente: base.html, estilos.css, 01-nucleo.js, 02-pantallas.js, 03-expediente.js
-herramientas/           construir.py (une src/ en index.html), prueba.py (99 comprobaciones, simula el micrófono y dos dispositivos), muestras.py, iconos.py
+herramientas/           construir.py (une src/ en index.html), prueba.py (105 comprobaciones, simula el micrófono y dos dispositivos), muestras.py, iconos.py
 docs/                   QUE_HACE_EVAU.pdf, INSUMOS_REQUERIDOS.md, PROMPT_CONTINUIDAD.html, Ejemplo_Plan_de_intervencion.pdf, Ejemplo_Informe_corte_noviembre.pdf
 ```
 Para cambiar algo: editar `src/`, ejecutar `python3 herramientas/construir.py .` y subir la versión en `sw.js` (CACHE) y en `01-nucleo.js` (VERSION).

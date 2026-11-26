@@ -76,7 +76,8 @@ const AYUDA_ORDENES = [
   ['Nuevo registro de <em>nombre</em>', 'Abre el registro de ese alumno y empieza a escuchar.'],
   ['Abre la carpeta de <em>nombre</em>', 'Abre el expediente del alumno.'],
   ['Plan de <em>nombre</em> · Imprime el plan de <em>nombre</em>', 'Abre el plan; con «imprime», «exporta» o «Word» abre la hoja para imprimir o bajar.'],
-  ['Informe de <em>nombre</em>', 'Abre la pantalla para generar su informe.'],
+  ['Informe final de <em>nombre</em> · Evaluación psicopedagógica de <em>nombre</em>', 'Abre esos formatos de la maestra de apoyo listos para imprimir o bajar a Word.'],
+  ['Informe de <em>nombre</em>', 'Abre la pantalla para generar un informe a partir de los registros.'],
   ['Plan de comunicación de <em>nombre</em> · Informe de comunicación de <em>nombre</em>', 'Abre esos formatos listos para imprimir o bajar a Word.'],
   ['Plan de psicología de <em>nombre</em> · Informe de psicología de <em>nombre</em>', 'Abre los formatos de psicología listos para imprimir o bajar a Word.'],
   ['Nuevo alumno', 'Abre el alta de un alumno.'],
@@ -115,6 +116,8 @@ function interpretarOrden(dicho) {
     if (!m[1]) { cerrarOrdenes(); nuevoRegistro({}, true); return { hecho: true }; }
     return conNombre(m[1], id => { cerrarOrdenes(); nuevoRegistro({ alumnoId: id }, true); });
   }
+  if ((m = t.match(/evaluacion psicopedagogica\s*(.*)$/))) return conNombre(m[1], id => { cerrarOrdenes(); irA('#alumno/' + id + '/evaluacion', () => clic('#vev')); });
+  if ((m = t.match(/^(?:imprime |exporta |descarga |abre |ver |haz |hacer )?(?:el )?informe final\s+(?!de comunicacion|de psicologia)(.*)$/))) return conNombre(m[1], id => { cerrarOrdenes(); irA('#alumno/' + id + '/evaluacion', () => clic('#vif')); });
   if ((m = t.match(/(plan|informe)(?: final)?(?: de atencion)?(?: de| del area de)? psicologia\s*(.*)$/))) {
     const boton = m[1] === 'plan' ? '#vpp' : '#vip';
     return conNombre(m[2], id => { cerrarOrdenes(); irA('#alumno/' + id + '/psicologia', () => clic(boton)); });
